@@ -963,10 +963,25 @@ body.is-sunset .visit { background: #dbd2bd; }
 
 @media (max-width: 640px) {
   /* --- Sabit başlık --- */
-  /* Üçü yan yana sığmıyor; logo ortada kalsın diye tagline düşüyor. */
+  /* Üçü yan yana sığmıyor, tagline düşüyor. */
   .fixed-tagline { display: none; }
-  .fixed-logo { width: 128px; top: calc(12px + var(--safe-top)); }
-  .fixed-nav { top: calc(22px + var(--safe-top)); right: 14px; gap: 12px; }
+
+  /*
+   * Logo ORTADAN SOLA geçiyor.
+   *
+   * Ortada kalınca menüyle çakışıyordu: 320px'lik ekranda ortalanmış
+   * 128px'lik logo 96–224 arasını, sağa yaslı menü de 216–306 arasını
+   * kaplıyor — "GoldBeans"in son harfleri "Menü"nün altında kalıyordu.
+   * Logoyu küçültmek yazıyı okunmaz yapardı; sola yaslamak ikisine de
+   * bol yer bırakıyor (aralarında ~75px boşluk kalıyor).
+   */
+  .fixed-logo {
+    width: 124px;
+    top: calc(16px + var(--safe-top));
+    left: 16px;
+    transform: none;
+  }
+  .fixed-nav { top: calc(22px + var(--safe-top)); right: 16px; gap: 14px; }
   /*
    * Dokunma hedefi. Görsel boyut aynı kalıyor (yazı 12px), ama linkin
    * tıklanabilir alanı dikeyde 44px'e çıkıyor — parmak ucu 12px'lik bir
