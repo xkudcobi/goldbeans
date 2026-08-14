@@ -1,4 +1,4 @@
-import cafe, { branchMapUrl, branchPhone } from '../config/cafe.js'
+import cafe, { branchMapUrl, branchPhone, telHref } from '../config/cafe.js'
 
 /*
  * Kapıdan girilince açılan ekran — şubeler.
@@ -34,7 +34,7 @@ export default function LocationsSection() {
                   <span key={line}>{line}</span>
                 ))}
                 {phone && (
-                  <a className="locations__phone" href={`tel:${phone.replace(/\s/g, '')}`}>
+                  <a className="locations__phone" href={telHref(phone)}>
                     {phone}
                   </a>
                 )}

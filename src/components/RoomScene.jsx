@@ -1,7 +1,7 @@
 import InteractiveProp from './InteractiveProp.jsx'
 import Stage, { Art } from './Stage.jsx'
 import boxStyle from './boxStyle.js'
-import cafe from '../config/cafe.js'
+import cafe, { telHref } from '../config/cafe.js'
 import { SCENE, PROPS, DEFS } from '../art/framerRoom.js'
 
 /*
@@ -46,9 +46,6 @@ const TIPS = {
 
 /** Hover çizimi olmadan basmak için */
 const withoutHot = (p) => ({ ...p, hot: null })
-
-/* tel: linki boşluk/parantez kaldırmayı istiyor */
-const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
 
 const SCROLL_MS = 620
 

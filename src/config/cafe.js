@@ -45,6 +45,12 @@ export function branchPhone(branch) {
   return 'phone' in branch ? branch.phone : cafe.contact.phone
 }
 
+/*
+ * `tel:` linki numarayı okunur haliyle kabul etmiyor — boşluk, parantez ve
+ * tire atılıyor, sadece rakamlar (ve varsa baştaki +) kalıyor.
+ */
+export const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
+
 export const cafe = {
   // --- Kimlik ---
   name: 'GoldBeans',
@@ -177,11 +183,14 @@ export const cafe = {
      * alt bilgi bunu kullanıyor. Ayrıca kendi numarası girilmemiş her
      * şube de buna düşüyor (bkz. branchPhone).
      */
-    phone: '0378 228 43 77',
-    phones: [
-      { label: 'Bartın', number: '0378 228 43 77' },
-      { label: 'Zonguldak', number: '0546 814 06 51' },
-    ],
+    phone: '0 (553) 827 44 89',
+    /*
+     * Şu an tüm şubeler tek hattan geçiyor, o yüzden liste tek satır ve
+     * `label` boş — şehir etiketi ayırt edecek ikinci numara olmadığında
+     * anlamsız. Şubeye özel hat açılırsa buraya {label, number} eklemek
+     * yeterli, VisitSection etiketi olanı basıyor.
+     */
+    phones: [{ label: '', number: '0 (553) 827 44 89' }],
     email: 'info@goldbeanscoffeehouse.com',
     instagram: '@goldbeanscoffeehouse',
     instagramUrl: 'https://www.instagram.com/goldbeanscoffeehouse/',
@@ -235,7 +244,7 @@ export const cafe = {
     {
       name: 'Goldbeans Zonguldak',
       lines: ['Meşrutiyet, Gazi Paşa Cd.', '67000 Merkez / Zonguldak'],
-      phone: '0546 814 06 51',
+      /* kendi hattı kalmadı → merkez numaraya düşüyor, bkz. branchPhone */
       /* Maps'te "Goldbeans Coffee Zonguldak" */
       mapUrl:
         'https://www.google.com/maps/place/Goldbeans+Coffee+Zonguldak/@41.4533647,31.7896132,17z/data=!4m6!3m5!1s0x409c7d007fe39d4b:0x7ac7be50e430d4ce!8m2!3d41.4533647!4d31.7896132!16s%2Fg%2F11ypgbxvvg',

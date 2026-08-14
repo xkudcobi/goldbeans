@@ -1,4 +1,4 @@
-import cafe, { branchMapUrl } from '../config/cafe.js'
+import cafe, { branchMapUrl, telHref } from '../config/cafe.js'
 
 /*
  * Ziyaret bilgileri: çalışma saatleri + adres.
@@ -55,8 +55,10 @@ export default function VisitSection() {
           <ul className="visit__contact">
             {cafe.contact.phones.map((p) => (
               <li key={p.number}>
-                <a href={`tel:${p.number.replace(/\s/g, '')}`}>{p.number}</a>
-                <span className="visit__phone-label">{p.label}</span>
+                <a href={telHref(p.number)}>{p.number}</a>
+                {/* tek numara varken şehir etiketi basılmıyor — ayırt edecek
+                    ikinci hat yok, cafe.js'te label boş bırakılıyor */}
+                {p.label && <span className="visit__phone-label">{p.label}</span>}
               </li>
             ))}
             <li><a href={`mailto:${cafe.contact.email}`}>{cafe.contact.email}</a></li>
