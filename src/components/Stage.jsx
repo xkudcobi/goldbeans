@@ -107,6 +107,20 @@ export default function Stage({ scene, defs, className = '', fit, header, childr
     <div
       className={`stage ${fitHeight ? 'stage--fit' : ''} ${className}`}
       ref={stageRef}
+      /*
+       * Tuvalin o anki ölçeği CSS'e de veriliyor.
+       *
+       * NEDEN: telefonda 1099px'lik tuval ~370px'e sığdırılıyor, yani her
+       * şey 0.33 katına iniyor. Çizimin kendisi vektör, küçülmesi sorun
+       * değil; ama fincanın fiyat etiketi gibi ÜSTÜNE BASTIĞIMIZ yazılar
+       * da 12px'ten ~4px'e düşüp okunmaz oluyordu. app.css bu değeri
+       * kullanıp o etiketleri geri büyütüyor ("Dar ekran" bölümü).
+       *
+       * Sadece DOM etiketleri için — çizimin İÇİNDEKİ balonlar (makine,
+       * demlik, saat) küçülmeye devam ediyor, çünkü onlar çizimin parçası
+       * ve büyütülürse balonun dışına taşarlar.
+       */
+      style={{ '--stage-scale': scale }}
     >
       {/* çizimlerin <use> ile baktığı sprite — görünmez, bir kez basılıyor */}
       <div

@@ -1,47 +1,98 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /*
- * Hover state'i + scroll temizliği.
+ * Sahne öğelerinin "üstüne gelindi" durumu — hem fare hem parmak için.
  *
- * NEDEN: Sayfa kaydırılırken öğe sabit duran imlecin altından çıkınca tarayıcı
- * `mouseleave`'i tetiklemiyor — bir sonraki fare hareketine kadar bekliyor.
- * Sonuç: fincan/lamba imleç üstünde olmadığı hâlde hover'da takılı kalıyor.
+ * ---- PARMAKLA NASIL ÇALIŞIYOR ----
+ * Dokunmatikte hover diye bir şey yok. Eskiden sadece onMouseEnter/Leave
+ * vardı ve telefonda iki şey birden bozuluyordu:
+ *   1) Fincana dokununca tarayıcı sahte bir mouseenter üretip menüye
+ *      atlıyordu — fiyat etiketi ekranda bir kare bile durmuyordu.
+ *   2) Etiket bir kez açıldığında onu kapatacak bir olay yoktu; başka
+ *      yere dokunsan da ekranda asılı kalıyordu.
  *
- * Çözüm: scroll başladığında state'i temizle. Fare gerçekten öğenin üstündeyse
- * bir sonraki mousemove zaten yeniden tetikliyor, yani kayıp yok.
+ * Kural şu: PARMAKLA İLK DOKUNUŞ GÖSTERİR, İKİNCİSİ GİDER. Yani fincana
+ * dokununca önce fiyatı görüyorsun, menüye gitmek istersen bir daha
+ * dokunuyorsun. Mobilde hover'la bilgi veren linklerin standart çözümü.
+ * Bu bekleme SADECE linklerde var — lamba ve radyo gibi düğmeler tek
+ * dokunuşta çalışıyor (bkz. InteractiveProp.jsx), çünkü onlarda balonun
+ * anlattığı bir şey yok, dokunmanın sonucu zaten anında görülüyor.
  *
- * ⚠️ DOĞRULANMADI — bu kod derleniyor ama düzeltmenin işe yaradığı GÖSTERİLEMEDİ.
- * Yapılan test: mug'a sentetik mouseover → scrollBy(0,220) → `is-hot` hâlâ duruyordu.
- * Araştırırken window'a hiç 'scroll' eventi düşmediği görüldü ki bu beklenmedik,
- * çünkü CloudIntro.jsx aynı yöntemle sorunsuz çalışıyor. Test oturumu hemen
- * ardından çöktü, dolayısıyla ölçüm de şüpheli.
+ * Fareyle hiçbir şey değişmedi: üstüne gel → açılır, çek → kapanır.
  *
- * Elle doğrula: bir fincanın üstüne gel, FAREYİ OYNATMADAN tekerlekle kaydır.
- * Fincan pembe kalıyorsa düzeltme çalışmıyor demektir. O durumda denenecekler:
- *   1) listener'ı `document`e veya capture:true ile bağla
- *   2) 'scroll' yerine 'wheel' + 'touchmove' dinle
- *   3) JS state yerine saf CSS :hover kullan (tarayıcı kendi düzeltir)
+ * ---- KAYDIRINCA TEMİZLİK ----
+ * Sayfa kaydırılırken öğe sabit duran imlecin altından çıkınca tarayıcı
+ * `mouseleave` tetiklemiyor, bir sonraki fare hareketine kadar bekliyor;
+ * öğe hover'da takılı kalıyor. Parmakta da açık etiketin üstünden
+ * kaydırınca aynısı oluyor. İkisini de scroll'da temizliyoruz.
  */
 export default function useHover() {
   const [hot, setHot] = useState(false)
+  const ref = useRef(null)
+  /* Son dokunuş parmakla mıydı? "İlk dokunuş gösterir" kuralı buna bakıyor. */
+  const byTouch = useRef(false)
 
   useEffect(() => {
     if (!hot) return
+
     const clear = () => setHot(false)
     window.addEventListener('scroll', clear, { passive: true })
-    return () => window.removeEventListener('scroll', clear)
+
+    /*
+     * Başka bir yere dokununca/tıklayınca kapansın. capture:true —
+     * araya giren stopPropagation'lar bunu yutmasın diye olay daha
+     * yukarıdayken yakalanıyor.
+     */
+    const away = (e) => {
+      if (!ref.current?.contains(e.target)) setHot(false)
+    }
+    document.addEventListener('pointerdown', away, true)
+
+    return () => {
+      window.removeEventListener('scroll', clear)
+      document.removeEventListener('pointerdown', away, true)
+    }
   }, [hot])
 
   const on = useCallback(() => setHot(true), [])
   const off = useCallback(() => setHot(false), [])
 
-  // doğrudan JSX'e yayılabilir
   const bind = {
-    onMouseEnter: on,
-    onMouseLeave: off,
+    ref,
+    /* Hangi aygıtla gelindiğini pointerType söylüyor: 'mouse' | 'touch' | 'pen' */
+    onPointerDown: (e) => {
+      byTouch.current = e.pointerType !== 'mouse'
+      if (byTouch.current) setHot(true)
+    },
+    /* Parmakta tarayıcı sahte enter/leave de üretiyor; onları eliyoruz,
+       yoksa yukarıdaki kuralla çakışıp etiket anında kapanıyor. */
+    onPointerEnter: (e) => { if (e.pointerType === 'mouse') setHot(true) },
+    onPointerLeave: (e) => { if (e.pointerType === 'mouse') setHot(false) },
+    /* klavyeyle gezenler için */
     onFocus: on,
     onBlur: off,
   }
 
-  return [hot, bind]
+  /*
+   * Linklerin tıklamasını geciktiren bekçi. `true` dönerse çağıran
+   * "bu dokunuş sadece gösterdi, git" demeli.
+   *
+   * Fare (veya zaten açık olan öğe) hiç beklemiyor.
+   */
+  const armed = useRef(false)
+  const guard = useCallback((e) => {
+    if (!byTouch.current) return false
+    /* aynı öğeye ikinci dokunuş → geç */
+    if (armed.current) { armed.current = false; return false }
+    armed.current = true
+    e.preventDefault()
+    setHot(true)
+    return true
+  }, [])
+
+  /* öğe kapandığında bekçi de sıfırlanmalı, yoksa bir sonraki dokunuş
+     "ikinci dokunuş" sanılıp doğrudan gidiyor */
+  useEffect(() => { if (!hot) armed.current = false }, [hot])
+
+  return [hot, bind, guard]
 }

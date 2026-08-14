@@ -11,6 +11,12 @@ import useHover from '../hooks/useHover.js'
  * `external` siteden çıkan linkler için (Instagram): yeni sekmede açar.
  *
  * Hover'da varyant swap + isteğe bağlı scale, geçişsiz.
+ *
+ * DOKUNMATİK: linklerde ilk dokunuş etiketi açıyor, ikincisi gidiyor
+ * (hooks/useHover.js'teki `guard`). Düğmelerde böyle bir bekleme YOK —
+ * lambaya dokununca sunset anında açılıyor. Sebep: düğmede balonun
+ * anlatacağı bir şey yok, sonucu zaten gözünle görüyorsun; linkte ise
+ * beklemenin amacı fiyat/bilgi etiketini okuyabilmen.
  */
 
 export default function InteractiveProp({
@@ -24,7 +30,7 @@ export default function InteractiveProp({
   scale = true,
   children,
 }) {
-  const [hot, bind] = useHover()
+  const [hot, bind, guard] = useHover()
 
   const cls = [
     'iprop',
@@ -45,6 +51,12 @@ export default function InteractiveProp({
         style={style}
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener noreferrer' : undefined}
+        /*
+         * Parmakla ilk dokunuş linki İZLEMİYOR, sadece etiketi açıyor —
+         * fincanın fiyatını görmeden menüye fırlamasın diye. İkinci
+         * dokunuş normal şekilde gidiyor. Fare etkilenmiyor.
+         */
+        onClick={guard}
         {...bind}
       >
         {content}

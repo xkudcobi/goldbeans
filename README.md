@@ -19,6 +19,55 @@ durduğu için iş akışı `BASE_PATH`'i veriyor; `vite.config.js` onu okuyor,
 doluyor. Deploy sonrası tarayıcı eski sürümü önbellekten gösterebiliyor —
 kontrol ederken sert yenile.
 
+### Kendi alan adına geçmek
+
+1. Alan adı sağlayıcında DNS kaydı aç (GitHub Pages için `A` kayıtları
+   `185.199.108–111.153`, `www` için `CNAME` → `xkudcobi.github.io`).
+2. Repoya `public/CNAME` ekle, içinde **tek satır** alan adı olsun:
+   `goldbeanscoffeehouse.com`. Başka bir şey yazma.
+3. GitHub → Settings → Pages → Custom domain'e aynı adı gir, DNS kontrolü
+   yeşile dönünce **Enforce HTTPS**'i işaretle.
+
+Taban yolu kendiliğinden ayarlanıyor: iş akışı `public/CNAME` görürse
+tabanı `/` yapıyor, görmezse `/goldbeans/`. Bu yüzden 2. adımı atlarsan
+site tüm CSS/JS'ini yanlış yoldan arayıp bomboş açılır.
+
+### Güvenlik
+
+Yayına giden sayfa bir **CSP** taşıyor: sadece kendi alan adından script
+ve stil yükleyebiliyor, dışarıya istek atamıyor, iframe'e gömülemiyor.
+Politika iki yerde duruyor ve **ikisi aynı kalmalı**:
+
+| Yer | Ne zaman geçerli |
+|---|---|
+| `vite.config.js` (`CSP`) | build sırasında `<meta>` olarak basılıyor — her yerde çalışır, GitHub Pages dahil |
+| `public/_headers` | Netlify / Cloudflare Pages gerçek HTTP başlığı olarak veriyor; `frame-ancestors` ve HSTS sadece burada olabiliyor |
+
+GitHub Pages özel başlık desteklemiyor, `_headers`'ı yok sayıyor. Tam
+başlık seti istiyorsan alan adını Cloudflare'e (ücretsiz plan yeter)
+bağlayıp Rules → Transform Rules → Modify Response Header ile aynılarını
+ekle.
+
+CSP `index.html`'e elle yazılmıyor, çünkü `script-src 'self'` geliştirme
+sunucusunu kırıyor (React Fast Refresh satır içi script basıyor). Eklenti
+`apply: 'build'` ile sadece üretim çıktısına ekliyor.
+
+**Yeni bir dış kaynak eklersen** (harita gömme, analitik, yeni font)
+sayfa sessizce onu yüklemez. Tarayıcı konsolunda `Refused to load…`
+yazar; ilgili direktifi HER İKİ dosyada da genişletmen gerekir.
+
+**Açık kalan iki konu:**
+
+- `public/music/` altındaki dört parça telifli (Daft Punk, Eagles, James
+  Hype, Superlover). Kendi alan adından yayınlamak, `github.io` altında
+  durmasından farklı bir görünürlük demek. Lisanssız müzikle telif
+  bildirimi gelebilir — telifsiz parçalarla değiştirmek en temizi.
+- Yazı tipi Google Fonts'tan geliyor, yani her ziyaretçinin IP'si
+  Google'a gidiyor (KVKK/GDPR tarafında tartışmalı). Kendi sunucundan
+  servis etmek için: `.woff2` dosyasını indirip `public/fonts/` içine at,
+  `tokens.css`'teki `@import` satırını `@font-face` ile değiştir, sonra
+  CSP'deki `fonts.googleapis.com` / `fonts.gstatic.com` izinlerini kaldır.
+
 ## Kendine uyarlamak
 
 **Tek dosya:** `src/config/cafe.js`. Kafe adı, tagline, imza içecekler, tüm menü,
@@ -86,6 +135,12 @@ satır sayısı sabit — metni değiştirebilirsin, satır ekleyemezsin.
 
 Hover geçişleri kasıtlı olarak **anlık** (transition yok) — yumuşatma eklersen
 illüstrasyonun karakteri kaybolur.
+
+**Telefonda hover yok, o yüzden kural şu:** linklerde (fincanlar, makine,
+bitki, telefon, kalemlik) **ilk dokunuş balonu/etiketi açıyor, ikinci
+dokunuş gidiyor**. Düğmelerde (lamba, radyo) bekleme yok, tek dokunuş
+çalışıyor — orada balonun anlatacağı bir şey yok, sonucu zaten görüyorsun.
+Kod: `hooks/useHover.js` (`guard`) ve `components/InteractiveProp.jsx`.
 
 ### Tıklamalar
 
@@ -157,6 +212,30 @@ src/
 scripts/build-scene.mjs → çıkarılan JSON'u art/*.js'e çeviren üreteç
 docs/                → etkileşim notları, çıkarma tarifi
 ```
+
+## Mobil
+
+Kırılım noktaları `styles/app.css` → "Dar ekran" bölümünde. Üçü var:
+**900px** (tablet: sabit başlık sıkışıyor), **640px** (telefon: tek sütun),
+ve ayrıca **yatay telefon** — orada sorun genişlik değil yükseklik.
+
+Bilinmesi gereken iki şey:
+
+- **Tezgah sahnesi telefonda ekranı doldurmuyor.** 1099px'lik tuval
+  genişliğe sığdırılınca ~180px'lik bir şeride iniyor; `100dvh`'lik
+  kutuda bu, üstte yarım ekran boşluk demekti. Telefonda sahne kendi
+  boyuna dönüyor, sayfa doğrudan menüye akıyor.
+- **Fiyat/numara etiketleri ters ölçekleniyor.** Onlar tuvalin içinde
+  duruyor, yani çizimle birlikte 0.33 katına iniyordu (12px → ~4px).
+  `Stage.jsx` o anki ölçeği `--stage-scale` olarak veriyor, CSS tersiyle
+  çarpıp yazıyı gerçek boyuna döndürüyor. **Çizimin İÇİNDEKİ balonlar
+  (makine, demlik, saat) bu işleme girmiyor** — onlar çizimin parçası,
+  büyütülürse balonun dışına taşarlar.
+
+Çentik/ev çubuğu payı `--safe-top` / `--safe-bottom` değişkenlerinden
+geliyor (`tokens.css`); güvenli alanı olmayan aygıtta ikisi de `0px`.
+Sabit başlıkla ilgili bir ölçü değiştirirsen bu değişkenleri korumayı
+unutma, yoksa iPhone'da başlık çentiğin altına giriyor.
 
 ## Palet
 

@@ -44,7 +44,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 72px;
+  /* çentiğin altı da örtülsün, yoksa başlık kayan yazının üstünde yüzüyor */
+  height: calc(72px + var(--safe-top));
   z-index: 55;
   background: var(--cream);
   pointer-events: none;
@@ -53,14 +54,14 @@ body.is-sunset .fixed-veil { background: var(--beige); }
 
 .fixed-tagline {
   position: fixed;
-  top: 28px;
+  top: calc(28px + var(--safe-top));
   left: 32px;
   z-index: 60;
   font-size: 13px;
 }
 .fixed-logo {
   position: fixed;
-  top: 14px;
+  top: calc(14px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
@@ -71,7 +72,7 @@ body.is-sunset .fixed-veil { background: var(--beige); }
 
 .fixed-nav {
   position: fixed;
-  top: 26px;
+  top: calc(26px + var(--safe-top));
   right: 32px;
   z-index: 60;
   display: flex;
@@ -105,7 +106,7 @@ body.is-sunset .fixed-veil { background: var(--beige); }
 
 /* ================= Sayfa ================= */
 /* Sabit üst katmanın (tagline/logo/menü) altından başlasın */
-.page { opacity: 0; padding-top: 92px; transition: opacity 500ms ease; }
+.page { opacity: 0; padding-top: calc(92px + var(--safe-top)); transition: opacity 500ms ease; }
 .page.is-ready { opacity: 1; }
 
 /* ================= Intro — ŞU AN KULLANILMIYOR =================
@@ -170,6 +171,14 @@ body.is-sunset .fixed-veil { background: var(--beige); }
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 92px);
+  /*
+   * dvh = adres çubuğu gizlenip açıldıkça DEĞİŞEN gerçek yükseklik.
+   * Mobil tarayıcılarda 100vh adres çubuğunu yok sayıp ekrandan taşıyor;
+   * tezgahın tabanı ekranın altına denk gelsin diye kurulan hizalama
+   * tam da o yüzden kayıyordu. Üstteki satır desteklemeyen tarayıcı için
+   * duruyor — sırayı bozma, sonraki geçerli kural kazanıyor.
+   */
+  min-height: calc(100dvh - 92px - var(--safe-top));
   padding-bottom: 0;
 }
 .scene__kicker {
@@ -507,7 +516,8 @@ body.is-sunset .sunlight { opacity: 1; }
 */
 .player {
   position: fixed;
-  bottom: 26px;
+  /* alttaki ev çubuğunun üstünde kalsın */
+  bottom: calc(26px + var(--safe-bottom));
   left: 50%;
   z-index: 70;
   display: flex;
@@ -589,7 +599,7 @@ body.is-sunset .sunlight { opacity: 1; }
 }
 
 @media (max-width: 640px) {
-  .player { bottom: 16px; gap: 10px; padding-left: 13px; }
+  .player { bottom: calc(16px + var(--safe-bottom)); gap: 10px; padding-left: 13px; }
   .player__title { font-size: 10px; }
 }
 
@@ -925,23 +935,184 @@ body.is-sunset .visit { background: #dbd2bd; }
 }
 .footer__year { margin: 30px 0 0; font-size: 11px; color: var(--brown); }
 
-/* ================= Dar ekran ================= */
-/*
- * Sahneler kendi ölçeklerini ResizeObserver ile ayarlıyor (Stage.jsx),
- * o yüzden burada onlara dokunmuyoruz. Dar ekranda düzeltilmesi gereken
- * tek şey sabit üst katman: logo tagline'ın ve menünün üstüne biniyordu.
+/* ================= Dar ekran =================
+ *
+ * Sahneler kendi ölçeklerini ResizeObserver ile ayarlıyor (Stage.jsx), o
+ * yüzden çizimlerin BOYUNA burada karışmıyoruz — sadece küçülmenin yan
+ * etkilerini topluyoruz.
+ *
+ * Üç eşik var:
+ *   900px → tablet/dar masaüstü: sabit başlık sıkışıyor
+ *   640px → telefon: tek sütun, boşluklar toparlanıyor
+ *   yatay telefon → ayrı, çünkü sorun genişlik değil YÜKSEKLİK
  */
+
 @media (max-width: 900px) {
   .fixed-logo { width: 150px; }
   .fixed-nav { right: 18px; gap: 14px; font-size: 12px; }
   .fixed-tagline { font-size: 11px; }
-  .page { padding-top: 78px; }
+  .page { padding-top: calc(78px + var(--safe-top)); }
+
+  /* Bölümler arası nefes payı masaüstü ölçüsünde kalırsa dar ekranda
+     sayfa boş boş uzuyor. */
+  .locations { padding: 80px 0 30px; }
+  .menu { padding: 80px 0 70px; }
+  .visit { padding: 70px 0; }
+  .section-head { margin-bottom: 36px; }
 }
 
 @media (max-width: 640px) {
-  /* logoya yer açmak için tagline'ı düşürüyoruz */
+  /* --- Sabit başlık --- */
+  /* Üçü yan yana sığmıyor; logo ortada kalsın diye tagline düşüyor. */
   .fixed-tagline { display: none; }
-  .fixed-logo { width: 128px; }
+  .fixed-logo { width: 128px; top: calc(12px + var(--safe-top)); }
+  .fixed-nav { top: calc(22px + var(--safe-top)); right: 14px; gap: 12px; }
+  /*
+   * Dokunma hedefi. Görsel boyut aynı kalıyor (yazı 12px), ama linkin
+   * tıklanabilir alanı dikeyde 44px'e çıkıyor — parmak ucu 12px'lik bir
+   * yazıyı güvenilir tutturamıyor. Negatif margin, büyüyen kutunun
+   * komşularını itmesini engelliyor.
+   */
+  .fixed-nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin: -14px 0;
+  }
+  /* alt çizgi 44px'lik kutunun dibine değil yazının altına insin */
+  .fixed-nav a::after { bottom: 12px; }
+
+  .fixed-veil { height: calc(62px + var(--safe-top)); }
+  .page { padding-top: calc(68px + var(--safe-top)); }
+
+  /* --- Tezgah sahnesi --- */
+  /*
+   * Masaüstünde tezgah ekranı dolduruyor. Telefonda tuval genişliğe
+   * sığdırılınca ~180px'lik bir şeride iniyor; 100vh'lik kutuda bu, üstte
+   * yarım ekran boşluk demek. Sahne kendi boyuna dönüyor, sayfa da
+   * doğrudan menüye akıyor.
+   */
+  /* Sıra önemli: .scene--counter de bir .scene, ikisi de aynı ağırlıkta.
+     Genel kural önce gelmezse tezgahın kendi alt boşluğunu eziyor. */
+  .scene { padding: 24px 0 40px; }
+  .scene--counter { min-height: 0; padding-bottom: 24px; }
   .scene__kicker { font-size: 11px; letter-spacing: 0.1em; }
-  .locations__list, .menu__grid { gap: 32px; }
+
+  /* Çizim ekranın kenarlarına kadar gitsin — 94vw'de kalan ince şerit
+     sahneyi olduğundan da küçük gösteriyor. `100%` yazıyoruz, `100vw`
+     değil: vw dikey kaydırma çubuğunun genişliğini de sayıp sayfayı
+     yana kaydırtabiliyor. */
+  .counter-stage,
+  .room-stage { width: 100%; }
+
+  /*
+   * DOM etiketlerini gerçek boyuna geri döndürüyoruz.
+   *
+   * Bunlar tuvalin içinde duruyor, yani .fstage'in scale'ini yiyorlar:
+   * 12px'lik fiyat telefonda ~4px'e düşüp okunmaz oluyordu. Stage.jsx
+   * o anki ölçeği --stage-scale olarak veriyor, tersiyle çarpıp
+   * büyütüyoruz. Sonuç: çizim küçük, üstündeki yazı normal.
+   *
+   * transform-origin alt kenarda — etiket öğenin ÜSTÜNDE duruyor, oradan
+   * büyüyünce fincanla arasındaki mesafe korunuyor.
+   *
+   * .plant__tip BİLEREK LİSTEDE YOK: o, çizimdeki boş balonun içine
+   * oturuyor. Büyütürsek yazı balonun dışına taşar.
+   */
+  .mug__label,
+  .phone__label {
+    transform: translateX(-50%) scale(calc(1 / var(--stage-scale, 1)));
+    transform-origin: bottom center;
+  }
+
+  /* --- Menü / şubeler --- */
+  /*
+   * Tek sütun. minmax(280px,1fr) 320px'lik telefonda zaten tek sütuna
+   * düşüyordu ama auto-fit'e güvenmek yerine açıkça yazıyoruz —
+   * satır aralığı da sütun aralığından farklı olsun istiyoruz.
+   */
+  .locations__list,
+  .menu__grid,
+  .visit__cols {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  /* menü grupları ve ziyaret sütunları birbirinden biraz daha ayrık dursun */
+  .menu__grid,
+  .visit__cols { gap: 40px; }
+
+  /*
+   * Menü satırı: ad + not solda, fiyat sağda, aralarında noktalar.
+   * Dar ekranda uzun adlar ("Tereyağlı Kruvasan") noktaları sıfıra
+   * ezip fiyata yapışıyordu. Ad artık sarabiliyor, noktalara da bir
+   * taban genişlik veriliyor.
+   */
+  .menu__item-main { min-width: 0; }
+  .menu__item-name { font-size: 13px; }
+  .menu__dots { min-width: 12px; }
+
+  /* --- Alt bilgi --- */
+  .footer { padding: 60px 0 30px; }
+  /* bulutlar 90px arayla ekrandan taşıyordu */
+  .footer__clouds { gap: 34px; margin-bottom: 22px; }
+  .footer__clouds svg { width: 76px; }
+  .footer__name { font-size: 20px; }
+  /* iki linkin arasındaki 26px dar ekranda tek satıra sığmıyordu */
+  .footer__meta { gap: 6px 16px; }
+
+  /* --- Pencereler --- */
+  .hours-card { padding: 22px 20px 20px; }
+  /* köşedeki × parmakla tutturulamayacak kadar küçüktü */
+  .hours-card__close,
+  .info-panel__close {
+    top: 0;
+    right: 4px;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+  }
+
+  /* --- Çalar adası --- */
+  .player__btn { width: 40px; height: 40px; }
+  .player { gap: 8px; padding: 8px 6px 8px 14px; }
+}
+
+/*
+ * Yatay telefon. Burada sorun genişlik değil yükseklik: ekran 380px
+ * kalıyor, tezgah sahnesi "kalan yüksekliği doldur" dediği için sabit
+ * başlığın altına sıkışıp eziliyor, altındaki içerik de görünmüyor.
+ * Sahneyi kendi boyuna bırakıp başlığı inceltiyoruz.
+ */
+@media (max-height: 520px) and (orientation: landscape) {
+  .scene--counter { min-height: 0; }
+  .fixed-logo { width: 116px; top: calc(8px + var(--safe-top)); }
+  .fixed-nav { top: calc(16px + var(--safe-top)); }
+  .fixed-veil { height: calc(52px + var(--safe-top)); }
+  .page { padding-top: calc(58px + var(--safe-top)); }
+  .player { bottom: calc(10px + var(--safe-bottom)); }
+  /* yatayda ekranın yarısını kaplayan pencere işe yaramıyor */
+  .hours-card { padding: 16px 20px 14px; }
+  .hours-card__kicker { margin-bottom: 10px; }
+  .hours-card__list li { padding: 5px 0; }
+  .hours-card__link { margin-top: 10px; }
+}
+
+/*
+ * Hover'ı OLMAYAN aygıtlar (telefon, tablet).
+ *
+ * :hover kuralları dokunmatikte "dokununca takılı kalan" bir duruma
+ * dönüşüyor — link dokunduktan sonra kırmızı kalıyor. Sahne öğeleri
+ * zaten JS ile yönetiliyor (useHover.js), sorun sadece düz metin
+ * linklerinde. Onları renk değiştirmek yerine olduğu gibi bırakıyoruz.
+ */
+@media (hover: none) {
+  .locations__map:hover,
+  .locations__phone:hover,
+  .visit__contact a:hover,
+  .hours-card__link:hover,
+  .hours-card__close:hover { color: inherit; }
+  .hours-card__link:hover { border-color: var(--ink); }
+  .fixed-nav a:hover::after { transform: scaleX(0); }
+  .player__btn:hover { opacity: 1; }
 }

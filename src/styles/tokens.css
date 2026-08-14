@@ -18,11 +18,40 @@
   --mug-hover-shift-y: -1px;
 
   --stroke-w: 2;
+
+  /*
+   * Çentik/ev çubuğu payı. Varsayılan 0 — normal ekranda hiçbir şey
+   * değişmiyor. Aşağıdaki @supports sadece gerçekten güvenli alanı olan
+   * aygıtlarda (iPhone X ve sonrası, bazı Android'ler) gerçek değeri
+   * yazıyor.
+   *
+   * NEDEN DEĞİŞKEN: env() doğrudan kurallara serpiştirilseydi her
+   * kırılım noktası için ayrı bir @supports bloğu gerekirdi ve o bloklar
+   * kendinden önceki medya sorgularının değerlerini ezerdi (tablette
+   * telefon dolgusu çıkıyordu). Böyle, dolgu tek yerde tanımlı.
+   */
+  --safe-top: 0px;
+  --safe-bottom: 0px;
+}
+
+@supports (top: env(safe-area-inset-top)) {
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 * { box-sizing: border-box; }
 
 html, body, #root { height: 100%; }
+
+html {
+  /* iOS Safari yatay çevrilince yazıları kendiliğinden büyütüyor ve
+     ölçüsü hesaplanmış düzeni (menü noktaları, balon kutuları) dağıtıyor.
+     Ölçekleme bize ait olsun. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
@@ -32,9 +61,17 @@ body {
   font-size: 14px;
   letter-spacing: 0.02em;
   -webkit-font-smoothing: antialiased;
+  /* Hiçbir şey sayfayı yana kaydırtmasın. `clip`, `hidden`in aksine
+     position:sticky/fixed öğeleri bozmuyor (sabit başlık ondan). */
+  overflow-x: clip;
 }
 
 a { color: inherit; text-decoration: none; }
+
+/* Dokunulan çizimin üstünde beliren gri kutuyu kaldırıyoruz — line-art
+   sahnenin ortasında sistem mavisi/grisi bir dikdörtgen çok yabancı
+   duruyor. Geri bildirimi zaten hover varyantı veriyor. */
+a, button, .iprop, .fprop { -webkit-tap-highlight-color: transparent; }
 
 button {
   font: inherit;
