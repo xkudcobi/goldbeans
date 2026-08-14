@@ -1,0 +1,146 @@
+# GoldBeans — kafe sitesi template'i
+
+İllüstrasyonlu, etkileşimli bir kafe sitesi. React + Vite.
+
+```bash
+npm install
+npm run dev     # http://localhost:5173
+npm run build   # dist/ klasörüne production çıktısı
+```
+
+## Kendine uyarlamak
+
+**Tek dosya:** `src/config/cafe.js`. Kafe adı, tagline, imza içecekler, tüm menü,
+çalışma saatleri, adres ve iletişim orada. Bileşenlere dokunman gerekmiyor.
+
+```js
+export const cafe = {
+  name: 'GoldBeans',             // logo (harf sayısı otomatik ayarlanır)
+  tagline: '(köşedeki kahveci)',
+  signatures: [ /* raftaki 4 fincan */ ],
+  menu: [ /* gruplar ve ürünler */ ],
+  hours: [ ... ], address: { ... }, contact: { ... },
+}
+```
+
+**Çizimler:** Sahnelerdeki öğelerin hiçbiri elle yazılmadı — hepsi
+<https://alt-portfolio.framer.website/> adresindeki siteden çıkarıldı; tezgah
+`src/art/framerScene.js`, oda `src/art/framerRoom.js` içinde. İkisi de
+üretilmiş dosya, elle düzenleme; nasıl yeniden üretileceği
+`docs/asset-extraction.md` içinde.
+
+> **Not:** İllüstrasyonlar bu projeye ait değil, o siteden alındı. Kişisel
+> deneme/paylaşım dışında (ticari kullanım, kendi işin olarak sunmak vb.)
+> kullanmadan önce hak sahibinden izin almak gerekir.
+
+## Sayfa yapısı
+
+1. **Açılış perdesi** — maroon zemin, 1.6sn (`Preloader.jsx`, `HOLD_MS`)
+2. **Tezgah sahnesi** — açılıştaki ilk manzara. Tam ekran: üstte biraz boşluk,
+   tezgahın tabanı ekranın dibinde. Tuval yüksekliğe göre ölçekleniyor
+   (`Stage.jsx`, `fit="height"`); genişlik üst sınır.
+3. **Menü** — gruplu fiyat listesi
+4. **Kapı odası** — kapı şubelere götürüyor
+5. **Şubeler** — kapının çıktığı ekran (tasarımı henüz konuşulmadı)
+6. **Ziyaret** — saatler, adres, iletişim
+7. **Alt bilgi**
+
+### Çıkarılan ama silinmeyen iki parça
+
+Geri istenirse hazır duruyorlar — bileşen de CSS de yerinde:
+
+| Parça | Neydi | Geri almak için |
+|---|---|---|
+| `components/CloudIntro.jsx` | Üstteki bulutlu boşluk, scroll'la beliren satırlar | `App.jsx`'te `<CounterScene/>`'den önce `<CloudIntro/>` |
+| `components/SceneCarousel.jsx` + `ControlBar.jsx` | Sağa/sola sahne geçişi | `<CounterScene/><RoomScene/>` yerine `<SceneCarousel/>` |
+
+## Etkileşimler
+
+Hover'da çizimin kendisi orijinalin hover haliyle değişiyor — efekt elle
+yazılmadı, iki hal de siteden çıkarıldı.
+
+| Öğe | Hover |
+|---|---|
+| **Fincan 1-4** | Pembeye dönüyor + içecek adı/notu/fiyatı beliriyor. Tıklayınca menüye gider. |
+| **Demlik (fincan 5)** | Kahverengiye dönüyor |
+| **Kahve makinesi** | Kahverengiye dönüyor (orijinaldeki GIF `public/art/machine-hover.gif`) |
+| **Lamba** | İp pembeye dönüyor |
+| **Radyo**, **Bitki** | Kahverengiye dönüyor |
+| **Saat** | Görünür değişiklik yok — orijinalde efekt bir animasyon, statik çıkarmayla gelmiyor |
+
+Hover geçişleri kasıtlı olarak **anlık** (transition yok) — yumuşatma eklersen
+illüstrasyonun karakteri kaybolur.
+
+### Tıklamalar
+
+| Öğe | Ne oluyor |
+|---|---|
+| **Lamba** | **Sunset modu** açılıp kapanıyor: zemin `#e5dece`'ye dönüyor, lambadan ışık hüzmesi düşüyor, soldan pencere ışığı vuruyor. Durum `body.is-sunset` — menü, ziyaret, footer da moda giriyor. |
+| **Radyo** | Müziği açıp kapatıyor. Sağ üstteki ses düğmesiyle aynı durum. **Parça henüz seçilmedi** — `cafe.js → music.src` boş; doldurunca kendiliğinden çalar. |
+| **Fincan 1-4** | Menüye gider |
+| **Kapı** (oda sahnesi) | Şubeler ekranına götürüyor. Açılıp kapanma zaten **hover'da** oluyor (çizimin iki hâli de orijinalden); tıklamaya ayrı animasyon eklenmedi. |
+| **Telefon** (oda sahnesi) | `tel:` ile aramaya götürüyor; hover'da numara beliriyor. Numara `cafe.js → contact.phone` |
+
+**Önemli — kaydırma:** `scrollIntoView({behavior:'smooth'})` bu projede
+güvenilmez çıktı (kimi zaman hiç kıpırdamıyor, kimi zaman yolun ortasında
+kalıyor; araya sert bir `scrollTo` koymak da tarayıcının süren animasyonuyla
+yarışa giriyor). Kapının kaydırması bu yüzden `RoomScene.jsx` içinde rAF ile
+elle animasyonlanıyor.
+
+**Önemli:** Hover'da çizimin HTML'ini değiştirme. İki hâl de DOM'da duruyor,
+seçimi CSS yapıyor (`.fprop__art--hot`). innerHTML'i hover'da değiştirince
+mousedown'ın indiği düğüm yok oluyor ve **tıklama düşüyor** — lambanın ve
+kapının tıklaması tam olarak bu yüzden çalışmıyordu.
+
+Sunset'in zemin rengi orijinalden ölçüldü; ışık hüzmesi ve pencere ışığı ise
+CSS ile kuruldu (çizim değil) — orijinaldeki karşılıkları DOM'da bulunamadı.
+
+Klavyeyle gezinilebilir: tüm etkileşimli öğeler Tab ile focus alıyor ve
+focus hover state'ini tetikliyor. `prefers-reduced-motion` destekleniyor.
+
+## Yapı
+
+```
+src/
+  config/cafe.js     → TÜM içerik burada
+  state/AppState.jsx → sunset + müzik durumu (lamba/radyo buradan besleniyor)
+  art/framerScene.js → tezgah çizimleri (ÜRETİLMİŞ, elle düzenleme)
+  art/framerRoom.js  → oda çizimleri  (ÜRETİLMİŞ, elle düzenleme)
+  art/Scenery.jsx    → bulut dekoru
+  components/Stage.jsx → iki sahnenin ortak tuval iskeleti
+  components/        → etkileşim + bölümler
+  styles/            → tokens.css (palet), app.css
+scripts/build-scene.mjs → çıkarılan JSON'u art/*.js'e çeviren üreteç
+docs/                → etkileşim notları, çıkarma tarifi, ham çıkarmalar
+```
+
+## Palet
+
+`#fffcf5` cream · `#511f20` ink · `#ff2c47` accent · `#ff4a62` hover ·
+`#e5dece` beige · `#785449` brown — hepsi `src/styles/tokens.css` içinde CSS
+değişkeni olarak tanımlı.
+
+Tipografi: Fragment Mono (Google Fonts).
+
+## Yapılacaklar
+
+- **Scroll'da takılı hover — açık hata.** Bir öğenin üstündeyken fareyi oynatmadan
+  kaydırınca hover state'i takılı kalıyor. `src/hooks/useHover.js` içine bir düzeltme
+  yazıldı ama **çalıştığı doğrulanamadı**; dosyanın başındaki nota bak. İlk iş bunu
+  elle test etmek.
+- **Şubeler ekranının tasarımı konuşulmadı** — şu an sade bir liste
+  (`LocationsSection.jsx`, içerik `cafe.js → locations`).
+- **Radyoya parça seçilmedi** — `cafe.js → music.src` boş.
+- Saatin hover'ı orijinalde animasyon; statik çıkarma onu yakalamıyor. İstenirse
+  CSS keyframe ile elle eklenebilir.
+- Kapının açılışı CSS'te perspektifli bir `rotateY` — orijinalin "open" varyantı
+  DOM'dan çekilemedi (kapı açılınca sahne unmount oluyor). Görsel olarak aynı iş
+  görüyor ama surat "şaşkın" hâline dönmüyor.
+- Bulutlar hâlâ elle yazılmış çizim — sahneler gibi orijinalden çıkarılabilir.
+- Lambanın hover'ındaki "SUNSET MOOD" balonunun koyu zemini çıkarmaya
+  yakalanmadı; yazı krem kaldığı için gündüz modunda görünmüyor.
+- Oda sahnesinde krem dolgulu bir figür var (sandalyede oturan biri). Krem
+  zeminde görünmüyor, **sunset'te beliriyor**. Orijinalin kendi çizimi;
+  istenmezse `chair-0` statik dekordan çıkarılabilir.
+- Mobil düzen ölçekleme ile çözüldü; dar ekran için ayrı sahne yerleşimi iyi olur
+- Menüye fotoğraf veya alerjen bilgisi eklenebilir

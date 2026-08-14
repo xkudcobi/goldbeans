@@ -1,0 +1,65 @@
+import useHover from '../hooks/useHover.js'
+
+/*
+ * Sahnedeki her etkileşimli öğe için ortak sarmalayıcı.
+ *
+ * Üç kılıkta çıkıyor:
+ *   href    → link (fincanlar menüye gider)
+ *   onClick → düğme (lamba sunset'i, radyo müziği açıp kapatıyor)
+ *   ikisi de yoksa → sadece hover'a tepki veren dekor
+ *
+ * Hover'da varyant swap + isteğe bağlı scale, geçişsiz.
+ */
+
+export default function InteractiveProp({
+  name,
+  className = '',
+  href,
+  style,
+  onClick,
+  pressed,
+  scale = true,
+  children,
+}) {
+  const [hot, bind] = useHover()
+
+  const cls = [
+    'iprop',
+    hot ? 'is-hot' : '',
+    pressed ? 'is-on' : '',
+    scale ? 'iprop--scales' : '',
+    className,
+  ].filter(Boolean).join(' ')
+
+  const content = typeof children === 'function' ? children(hot) : children
+
+  if (href) {
+    return (
+      <a className={cls} href={href} aria-label={name} style={style} {...bind}>
+        {content}
+      </a>
+    )
+  }
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={cls}
+        aria-label={name}
+        aria-pressed={pressed}
+        style={style}
+        onClick={onClick}
+        {...bind}
+      >
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <div className={cls} role="img" aria-label={name} style={style} tabIndex={0} {...bind}>
+      {content}
+    </div>
+  )
+}

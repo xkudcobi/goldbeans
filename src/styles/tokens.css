@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&display=swap');
+
+:root {
+  /* Orijinal siteden alınan Framer CSS token'ları */
+  --cream: #fffcf5;
+  --ink: #511f20;
+  --accent: #ff2c47;
+  --accent-soft: #ff4a62;
+  --beige: #e5dece;
+  --brown: #785449;
+
+  --mono: 'Fragment Mono', ui-monospace, monospace;
+
+  /* Ölçülen hover değerleri — bkz. docs/interaction-map.md §2 */
+  --mug-hover-scale-x: 1.05155;
+  --mug-hover-scale-y: 1.06349;
+  --mug-hover-shift-x: -0.5px;
+  --mug-hover-shift-y: -1px;
+
+  --stroke-w: 2;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Tüm stand-in line-art için ortak çizim dili */
+.line-art {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: var(--stroke-w);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}

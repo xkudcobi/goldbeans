@@ -1,0 +1,743 @@
+/* ================= Preloader ================= */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: var(--ink);
+  color: var(--cream);
+  letter-spacing: 0.3em;
+  transition: opacity 600ms ease;
+}
+.preloader.is-fading { opacity: 0; }
+
+/* Daktilo satırı. min-height sabit — yoksa yazı silinip boşaldığında
+   satır yüksekliği sıfırlanıp imleç zıplıyor. */
+.preloader__line {
+  display: flex;
+  align-items: center;
+  min-height: 1.4em;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+}
+.preloader__caret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 4px;
+  background: var(--cream);
+  animation: caret 900ms steps(1) infinite;
+}
+@keyframes caret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .preloader__caret { animation: none; }
+}
+
+/* ================= Sabit UI ================= */
+/* Başlığın arkasındaki zemin — sayfa rengiyle aynı, sunset'te beige */
+.fixed-veil {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: 55;
+  background: var(--cream);
+  pointer-events: none;
+}
+body.is-sunset .fixed-veil { background: var(--beige); }
+
+.fixed-tagline {
+  position: fixed;
+  top: 28px;
+  left: 32px;
+  z-index: 60;
+  font-size: 13px;
+}
+.fixed-logo {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  /* logo viewBox'ı harf sayısına göre büyüyor; genişlik ona göre ayarlı */
+  width: 210px;
+}
+.logo { display: block; width: 100%; height: auto; }
+
+.fixed-nav {
+  position: fixed;
+  top: 26px;
+  right: 32px;
+  z-index: 60;
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.fixed-nav a { position: relative; }
+.fixed-nav a::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms ease;
+}
+.fixed-nav a:hover::after { transform: scaleX(1); }
+
+.fixed-sound {
+  position: fixed;
+  top: 22px;
+  right: 30px;
+  z-index: 60;
+  width: 26px;
+  height: 26px;
+  color: var(--ink);
+}
+.fixed-sound svg { width: 100%; height: 100%; display: block; }
+
+/* ================= Sayfa ================= */
+/* Sabit üst katmanın (tagline/logo/menü) altından başlasın */
+.page { opacity: 0; padding-top: 92px; transition: opacity 500ms ease; }
+.page.is-ready { opacity: 1; }
+
+/* ================= Intro — ŞU AN KULLANILMIYOR =================
+   Üstteki bulutlu boşluk sayfadan çıkarıldı (App.jsx'e bak). Stiller
+   duruyor: <CloudIntro/>'yu geri koyarsan hiçbir şey değişmeden çalışır.
+*/
+.intro {
+  position: relative;
+  min-height: 190vh;
+  overflow: hidden;
+}
+.intro__clouds { position: absolute; inset: 0; }
+.intro__cloud {
+  position: absolute;
+  width: 130px;
+  animation-name: drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.intro__cloud svg { width: 100%; height: auto; display: block; }
+
+@keyframes drift {
+  from { margin-left: -22vw; }
+  to   { margin-left: 108vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro__cloud { animation: none; }
+}
+
+.intro__lines {
+  position: sticky;
+  top: 42vh;
+  text-align: center;
+  z-index: 2;
+}
+.intro__line {
+  margin: 0 0 14px;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  transition: opacity 220ms ease;
+}
+
+/* ================= Carousel — ŞU AN KULLANILMIYOR =================
+   Sağa/sola sahne geçişi kaldırıldı; sahneler alt alta duruyor.
+   <SceneCarousel/>'i geri koyarsan bu stiller hazır.
+*/
+.carousel { position: relative; overflow: hidden; padding-bottom: 90px; }
+.carousel__track {
+  display: flex;
+  width: 100%;
+  transition: transform 620ms cubic-bezier(0.7, 0, 0.2, 1);
+}
+.carousel__slide { flex: 0 0 100%; min-width: 100%; }
+
+/* ================= Sahne ortak ================= */
+.scene { position: relative; padding: 40px 0 70px; }
+
+/* Tezgah ilk manzara: üstte az boşluk, tezgahın tabanı ekranın dibinde.
+   Tuvalin alt kenarı zaten tezgahın tabanı, o yüzden sahneyi dibe yaslamak
+   yetiyor. .page'in üst dolgusu sabit UI'ı açıyor. */
+.scene--counter {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 92px);
+  padding-bottom: 0;
+}
+.scene__kicker {
+  margin: 0 0 16px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+/* Başlık kutusu tuvalin ölçeklenmiş genişliğinde ve ortalanmış — böylece
+   yazı çizimin sol kenarıyla hizalı kalıyor. */
+.stage__header { margin: 0 auto; }
+.pulser {
+  display: inline-block;
+  width: 7px; height: 7px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* ================= Sahne tuvali =================
+   Çizimler orijinal siteden çıkarıldı (src/art/framerScene.js ve
+   framerRoom.js) ve sabit bir tuvale göre px olarak konumlanıyor. Tuval
+   bir bütün olarak scale ediliyor — tek tek öğeleri yüzdeye çevirmek iç
+   ölçüleri bozar.
+*/
+.stage {
+  position: relative;
+  margin: 0 auto;
+}
+.stage__box { position: relative; }
+/* İki sahne de aynı genişlikte dursun — tezgah ayrıca kalan yüksekliğe
+   göre ölçekleniyor, o yüzden genişlik burada üst sınır. */
+.counter-stage,
+.room-stage { width: min(1122px, 94vw); }
+
+/* fit modunda tuval kalan yüksekliği doldurup dibe yaslanıyor */
+.stage--fit {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.stage--fit .stage__box { width: 100%; margin-top: auto; }
+
+.fstage {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform-origin: top center;
+}
+.fprop {
+  position: absolute;
+  display: block;
+}
+/* İki hâl üst üste duruyor, hover hangisini göstereceğimizi seçiyor.
+   Geçiş yok — orijinaldeki gibi anlık. */
+.fprop__art { position: absolute; inset: 0; }
+/* Çıkarılan işaretlemede <p> var; tarayıcının varsayılan 1em margin'i
+   satırları birbirinden ayırıp yazıyı kutusundan taşırıyor. */
+.fprop__art p { margin: 0; }
+.fprop__art--hot { display: none; }
+.iprop.is-hot > .fprop__art--hot  { display: block; }
+.iprop.is-hot > .fprop__art--idle { display: none; }
+/* Raf/tezgah/lekeler fincanların kutusunu örtüyor — hover'ı yutmasınlar */
+.fprop--static { pointer-events: none; }
+.fprop--clickable { cursor: pointer; }
+/* sprite: yer kaplamamalı ama display:none olmamalı — <use> çözülmez */
+.fdefs {
+  position: absolute;
+  width: 0; height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.prop { position: absolute; }
+.prop svg { width: 100%; height: auto; display: block; }
+
+/* ================= Poster =================
+   Orijinalin üç satırlık yer tutucusu silinip yerine tek satır basılıyor
+   (RoomScene.jsx). Kutu posterin kağıdıyla aynı: çizimde left:9 top:10,
+   127x160. Yazı o kutunun tam ortasında duruyor.
+*/
+.poster__text {
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  width: 127px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0.2px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ================= MUG — hover mekaniği =================
+   Orijinalde hover bir Framer variant swap'i: çizimin kendisi pembeye
+   dönüyor, geçiş YOK (0s). Varyantın iki hali de siteden çıkarıldı,
+   burada sadece hangisinin basılacağını seçiyoruz — yumuşatma EKLEME.
+   bkz. docs/interaction-map.md §2
+*/
+.fprop--mug { cursor: pointer; transition: none; }
+.fprop--mug:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+
+/* bitkinin balonu — çizimdeki boş balonun tam üstüne oturuyor */
+.plant__tip {
+  position: absolute;
+  left: 33.7px;
+  top: -41.6px;
+  width: 142px;
+  height: 46px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  color: var(--cream);
+  font-size: 11px;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
+}
+.iprop.is-hot > .plant__tip { display: flex; }
+
+/* telefon numarası — telefonun üstünde hover'da beliriyor */
+.phone__label {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+}
+.fprop--phone.is-hot .phone__label { display: block; }
+
+/* içecek etiketi — fincanın üstünde beliriyor */
+.mug__label {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--cream);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+}
+.fprop--mug.is-hot .mug__label { display: flex; }
+.mug__label-name  { font-size: 12px; letter-spacing: 0.06em; }
+.mug__label-note  { font-size: 10px; opacity: 0.7; }
+.mug__label-price { font-size: 11px; color: var(--accent-soft); margin-top: 2px; }
+
+/* ================= Etkileşimli sahne öğeleri =================
+   Orijinalde tezgahtaki TÜM öğelerin Default/Hover variant'ı var
+   (Machine, LAMP, Plant, Radio, Clock — bkz. interaction-map.md §5b).
+   Mug'la aynı snap mantığı: transition yok.
+*/
+.iprop {
+  display: block;
+  cursor: pointer;
+  transition: none;
+}
+.iprop svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+.iprop--scales.is-hot {
+  transform:
+    translate(var(--mug-hover-shift-x), var(--mug-hover-shift-y))
+    scale(var(--mug-hover-scale-x), var(--mug-hover-scale-y));
+}
+.iprop:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+
+/* --- kahve damlaması (Machine hover) ---
+   Orijinalde bu bir GIF; burada SVG damla + fincan dolumu olarak kuruldu. */
+.drip__d {
+  animation: drip 1.1s cubic-bezier(0.55, 0, 0.85, 0.35) infinite;
+  opacity: 0;
+}
+.drip__d--2 { animation-delay: 0.37s; }
+.drip__d--3 { animation-delay: 0.74s; }
+
+@keyframes drip {
+  0%        { transform: translateY(0);    opacity: 0; }
+  12%       { opacity: 1; }
+  85%       { opacity: 1; }
+  100%      { transform: translateY(26px); opacity: 0; }
+}
+
+.cup-fill {
+  animation: cup-fill 2.4s ease-out forwards;
+  transform-origin: center bottom;
+}
+@keyframes cup-fill {
+  from { transform: scaleY(0.15); }
+  to   { transform: scaleY(1); }
+}
+
+/* --- bitki salınımı (Plant hover) --- */
+.sway { animation: sway 2.2s ease-in-out infinite; }
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.6deg); }
+  50%      { transform: rotate(1.6deg); }
+}
+
+/* --- radyo: makara dönüşü + ses dalgaları --- */
+.spin { animation: spin 1.5s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.waves__w { opacity: 0; animation: wave 1.4s ease-out infinite; }
+.waves__w--2 { animation-delay: 0.25s; }
+.waves__w--3 { animation-delay: 0.5s; }
+@keyframes wave {
+  0%   { opacity: 0; }
+  35%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* --- saat alarmı --- */
+.ring { animation: ring 0.12s ease-in-out infinite; }
+@keyframes ring {
+  0%, 100% { transform: translateX(-1px); }
+  50%      { transform: translateX(1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drip__d, .cup-fill, .sway, .spin, .waves__w, .ring { animation: none; }
+}
+
+/* ================= SUNSET MODU =================
+   Lambaya tıklayınca. Zemin rengi orijinalden ölçüldü: #e5dece (--beige).
+   Işık hüzmesi ve pencere ışığı orijinalde de sahnenin üstüne binen düz
+   renk parçaları — burada CSS ile kuruldu, çizim değil.
+*/
+body.is-sunset { background: var(--beige); }
+body.is-sunset .page { background: var(--beige); }
+
+/* Işık çizimlerin ARKASINDA kalmalı — orijinalde de hüzmenin içindeki
+   çizgiler görünüyor. Üste alırsan tezgahın çıtalarını siliyor. */
+.sunlight {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+.fprop { z-index: 1; }
+/* Üstüne gelinen öğe öne çıksın — yoksa etiketi/balonu kendisinden SONRA
+   gelen çizimler (raf, tezgah) kesiyor. "Sıcak Çikolata" etiketi bu
+   yüzden yarım görünüyordu. */
+.fprop.is-hot { z-index: 30; }
+body.is-sunset .sunlight { opacity: 1; }
+
+/* lambanın altındaki huzme — lamba tuvalde 548,-3 / 98x127, ampul ~597,60 */
+.sunlight__beam {
+  position: absolute;
+  left: 287px;
+  top: 58px;
+  width: 620px;
+  height: 505px;
+  background: var(--cream);
+  clip-path: polygon(49.2% 0, 50.8% 0, 100% 100%, 0 100%);
+}
+/* soldaki pencere ışığı, iki panel */
+.sunlight__pane {
+  position: absolute;
+  background: var(--cream);
+  transform: skewY(-14deg);
+}
+.sunlight__pane--a { left: -250px; top: 90px;  width: 175px; height: 400px; }
+.sunlight__pane--b { left: -55px;  top: 40px;  width: 150px; height: 340px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sunlight { transition: none; }
+}
+
+/* ================= Kontrol çubuğu — ŞU AN KULLANILMIYOR ================= */
+.controlbar {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--cream);
+}
+.controlbar__btn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cream);
+  transition: opacity 160ms ease;
+}
+.controlbar__btn svg { width: 20px; height: 20px; }
+.controlbar__btn .line-art { stroke: var(--cream); }
+.controlbar__btn:hover:not(:disabled) { opacity: 0.6; }
+.controlbar__btn:disabled { opacity: 0.28; cursor: default; }
+.controlbar__sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--cream);
+  opacity: 0.35;
+}
+
+/* ================= Info paneli ================= */
+.info-panel {
+  position: absolute;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 55;
+  width: min(420px, 88vw);
+  padding: 20px 22px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.info-panel p { margin: 0 0 10px; }
+.info-panel p:last-of-type { margin-bottom: 0; }
+.info-panel__meta { color: var(--brown); }
+.info-panel__meta a { border-bottom: 1px solid var(--ink); color: var(--ink); }
+.info-panel__close {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ================= Bölüm başlıkları ================= */
+.section-head {
+  width: min(1180px, 90vw);
+  margin: 0 auto 46px;
+}
+.section-head__kicker {
+  margin: 0 0 12px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+.section-head__title {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 54px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* ================= Şubeler — kapının çıktığı ekran =================
+   Tasarımı henüz konuşulmadı; sitenin geri kalanıyla aynı dilde sade liste.
+*/
+.locations { padding: 110px 0 40px; }
+.locations__list {
+  width: min(1180px, 90vw);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 40px 64px;
+}
+.locations__item {
+  padding-top: 16px;
+  border-top: 2px solid var(--ink);
+}
+.locations__name {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.locations__address {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-style: normal;
+  font-size: 13px;
+}
+.locations__hours { margin: 12px 0 16px; font-size: 12px; color: var(--brown); }
+.locations__map { font-size: 12px; border-bottom: 1px solid currentColor; }
+.locations__map:hover { color: var(--accent); }
+
+/* ================= Menü ================= */
+.menu { padding: 110px 0 90px; }
+.menu__grid {
+  width: min(1180px, 90vw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 54px 64px;
+}
+.menu__group-title {
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.menu__list { list-style: none; margin: 0; padding: 0; }
+.menu__item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 0;
+}
+.menu__item-main { display: flex; flex-direction: column; gap: 2px; }
+.menu__item-name { font-size: 14px; }
+.menu__item-note { font-size: 11px; color: var(--brown); }
+.menu__dots {
+  flex: 1;
+  height: 1px;
+  min-width: 18px;
+  background-image: radial-gradient(circle, var(--brown) 1px, transparent 1px);
+  background-size: 5px 1px;
+  background-repeat: repeat-x;
+  opacity: 0.55;
+  transform: translateY(-3px);
+}
+.menu__item-price { font-size: 13px; white-space: nowrap; }
+
+.menu__footnote {
+  width: min(1180px, 90vw);
+  margin: 54px auto 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--beige);
+  font-size: 12px;
+  color: var(--brown);
+}
+
+/* ================= Ziyaret ================= */
+.visit {
+  padding: 90px 0;
+  background: var(--beige);
+}
+/* Sunset'te sayfanın kendisi beige oluyor; blok kaybolmasın diye bir ton koyu */
+body.is-sunset .visit { background: #dbd2bd; }
+.visit__cols {
+  width: min(1180px, 90vw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 48px;
+}
+.visit__label {
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+.visit__hours { list-style: none; margin: 0; padding: 0; }
+.visit__hours li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 13px;
+}
+.visit__dots {
+  flex: 1;
+  height: 1px;
+  min-width: 14px;
+  background-image: radial-gradient(circle, var(--brown) 1px, transparent 1px);
+  background-size: 5px 1px;
+  opacity: 0.5;
+  transform: translateY(-3px);
+}
+.visit__address {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-style: normal;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.visit__link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 2px;
+}
+.visit__contact { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.visit__contact li { padding: 6px 0; }
+.visit__contact a:hover { color: var(--accent); }
+
+/* ================= Alt bilgi ================= */
+.footer {
+  position: relative;
+  padding: 80px 0 40px;
+  text-align: center;
+  overflow: hidden;
+}
+.footer__clouds {
+  display: flex;
+  justify-content: center;
+  gap: 90px;
+  opacity: 0.5;
+  margin-bottom: 30px;
+}
+.footer__clouds svg { width: 110px; height: auto; }
+.footer__name {
+  margin: 0 0 10px;
+  font-size: 26px;
+  letter-spacing: 0.16em;
+}
+.footer__note {
+  margin: 0 auto 26px;
+  max-width: 46ch;
+  font-size: 12px;
+  color: var(--brown);
+  line-height: 1.7;
+}
+.footer__meta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  font-size: 12px;
+}
+.footer__year { margin: 30px 0 0; font-size: 11px; color: var(--brown); }
+
+/* ================= Dar ekran ================= */
+/*
+ * Sahneler kendi ölçeklerini ResizeObserver ile ayarlıyor (Stage.jsx),
+ * o yüzden burada onlara dokunmuyoruz. Dar ekranda düzeltilmesi gereken
+ * tek şey sabit üst katman: logo tagline'ın ve menünün üstüne biniyordu.
+ */
+@media (max-width: 900px) {
+  .fixed-logo { width: 150px; }
+  .fixed-nav { right: 18px; gap: 14px; font-size: 12px; }
+  .fixed-tagline { font-size: 11px; }
+  .page { padding-top: 78px; }
+}
+
+@media (max-width: 640px) {
+  /* logoya yer açmak için tagline'ı düşürüyoruz */
+  .fixed-tagline { display: none; }
+  .fixed-logo { width: 128px; }
+  .scene__kicker { font-size: 11px; letter-spacing: 0.1em; }
+  .locations__list, .menu__grid { gap: 32px; }
+}
