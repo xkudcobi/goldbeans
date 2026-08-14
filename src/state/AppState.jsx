@@ -24,17 +24,45 @@ export function AppState({ children }) {
   }, [sunset])
 
   /*
-   * Radyo. Parça henüz seçilmedi — config/cafe.js → music.src boş.
-   * Boşken düğme yine çalışıyor (ikon değişiyor), sadece ses yok;
-   * src'yi doldurunca bu blok kendiliğinden devreye giriyor.
+   * Radyo. config/cafe.js → music.tracks sırayla çalıyor, sonuncu bitince
+   * başa dönüyor. Liste boşsa düğme yine çalışıyor (ikon değişiyor),
+   * sadece ses çıkmıyor.
    */
+  const tracks = cafe.music?.tracks ?? []
+  const [track, setTrack] = useState(0)
   const audioRef = useRef(null)
+
+  /* Tek bir Audio nesnesi; parça bitince sıradakine geçiyor */
   useEffect(() => {
-    const src = cafe.music?.src
-    if (!src) return
-    const el = audioRef.current ?? (audioRef.current = new Audio(src))
-    el.loop = true
+    if (!tracks.length) return
+    const el = (audioRef.current = new Audio())
     el.volume = cafe.music.volume ?? 0.5
+    const next = () => setTrack((i) => (i + 1) % tracks.length)
+    el.addEventListener('ended', next)
+    return () => {
+      el.removeEventListener('ended', next)
+      el.pause()
+      audioRef.current = null
+    }
+  }, [])
+
+  /*
+   * Sıra değişince kaynağı yükle — çalıyorsak ara vermeden devam et.
+   * Yol BASE_URL ile kuruluyor: site Pages'te kökte değil /goldbeans/
+   * altında duruyor, mutlak '/music/...' orada kırılırdı (bkz. vite.config.js).
+   * Dosya adlarında boşluk var, encodeURI şart.
+   */
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el || !tracks.length) return
+    el.src = encodeURI(import.meta.env.BASE_URL + tracks[track].src.replace(/^\//, ''))
+    if (playing) el.play().catch(() => {})
+  }, [track])
+
+  /* Radyoya tıklama */
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el) return
     if (playing) el.play().catch(() => {})
     else el.pause()
   }, [playing])

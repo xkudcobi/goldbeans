@@ -140,15 +140,20 @@ export default function RoomScene() {
             )
           }
 
-          /* poster: orijinalin yer tutucu yazısı silinip kendi yazımız basılıyor */
+          /*
+           * Poster: orijinalin yer tutucu yazısı silinip kendi yazımız
+           * basılıyor. Tıklayınca Instagram'a çıkıyor.
+           */
           if (p.id === 'poster-1') {
             return (
               <InteractiveProp
                 key={p.id}
-                name={cafe.posterText}
-                className="fprop fprop--poster"
+                name={`${cafe.posterText} — Instagram hesabımız`}
+                className="fprop fprop--poster fprop--clickable"
                 style={boxStyle(p)}
                 scale={false}
+                href={cafe.contact.instagramUrl}
+                external
               >
                 <Art prop={p} replace={[[POSTER_PLACEHOLDER, '']]} />
                 <span className="poster__text">{cafe.posterText}</span>

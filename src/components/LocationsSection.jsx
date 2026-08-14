@@ -1,4 +1,4 @@
-import cafe from '../config/cafe.js'
+import cafe, { branchMapUrl, branchPhone } from '../config/cafe.js'
 
 /*
  * Kapıdan girilince açılan ekran — şubeler.
@@ -19,25 +19,40 @@ export default function LocationsSection() {
       </header>
 
       <ul className="locations__list">
-        {cafe.locations.map((loc) => (
-          <li className="locations__item" key={loc.name}>
-            <h3 className="locations__name">{loc.name}</h3>
-            <address className="locations__address">
-              {loc.lines.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-            </address>
-            <p className="locations__hours">{loc.hours}</p>
-            <a
-              className="locations__map"
-              href={loc.mapUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Haritada aç →
-            </a>
-          </li>
-        ))}
+        {cafe.locations.map((loc) => {
+          const mapUrl = branchMapUrl(loc)
+          const phone = branchPhone(loc)
+
+          return (
+            <li className="locations__item" key={loc.name}>
+              <h3 className="locations__name">
+                {loc.name}
+                {loc.soon && <span className="locations__soon">yakında</span>}
+              </h3>
+              <address className="locations__address">
+                {loc.lines.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+                {phone && (
+                  <a className="locations__phone" href={`tel:${phone.replace(/\s/g, '')}`}>
+                    {phone}
+                  </a>
+                )}
+              </address>
+              {/* adresi olmayan şubede (İstanbul) link basmıyoruz */}
+              {mapUrl && (
+                <a
+                  className="locations__map"
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Haritada aç →
+                </a>
+              )}
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

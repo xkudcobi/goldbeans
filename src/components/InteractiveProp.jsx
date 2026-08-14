@@ -8,6 +8,8 @@ import useHover from '../hooks/useHover.js'
  *   onClick → düğme (lamba sunset'i, radyo müziği açıp kapatıyor)
  *   ikisi de yoksa → sadece hover'a tepki veren dekor
  *
+ * `external` siteden çıkan linkler için (Instagram): yeni sekmede açar.
+ *
  * Hover'da varyant swap + isteğe bağlı scale, geçişsiz.
  */
 
@@ -15,6 +17,7 @@ export default function InteractiveProp({
   name,
   className = '',
   href,
+  external,
   style,
   onClick,
   pressed,
@@ -35,7 +38,15 @@ export default function InteractiveProp({
 
   if (href) {
     return (
-      <a className={cls} href={href} aria-label={name} style={style} {...bind}>
+      <a
+        className={cls}
+        href={href}
+        aria-label={name}
+        style={style}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noreferrer' : undefined}
+        {...bind}
+      >
         {content}
       </a>
     )

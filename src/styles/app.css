@@ -574,8 +574,25 @@ body.is-sunset .sunlight { opacity: 1; }
   font-style: normal;
   font-size: 13px;
 }
-.locations__hours { margin: 12px 0 16px; font-size: 12px; color: var(--brown); }
-.locations__map { font-size: 12px; border-bottom: 1px solid currentColor; }
+.locations__soon {
+  margin-left: 8px;
+  padding: 2px 7px;
+  border: 1px solid var(--brown);
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brown);
+  vertical-align: middle;
+}
+.locations__phone { margin-top: 8px; color: var(--brown); }
+.locations__phone:hover { color: var(--accent); }
+.locations__map {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 12px;
+  border-bottom: 1px solid currentColor;
+}
 .locations__map:hover { color: var(--accent); }
 
 /* ================= Menü ================= */
@@ -684,6 +701,14 @@ body.is-sunset .visit { background: #dbd2bd; }
 .visit__contact { list-style: none; margin: 0; padding: 0; font-size: 13px; }
 .visit__contact li { padding: 6px 0; }
 .visit__contact a:hover { color: var(--accent); }
+/* numaranın yanındaki şehir etiketi — hangi hat olduğunu ayırt etmek için */
+.visit__phone-label {
+  margin-left: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
 
 /* ================= Alt bilgi ================= */
 .footer {

@@ -13,7 +13,7 @@ export default function Footer() {
       <p className="footer__note">{cafe.footerNote}</p>
 
       <div className="footer__meta">
-        <span>{cafe.address.lines.join(' · ')}</span>
+        <span>{cafe.locations[0].lines.join(' · ')}</span>
         <span>{cafe.contact.phone}</span>
       </div>
 

@@ -21,10 +21,23 @@ const STATIC = ['Counter', 'Manchas', 'Shells']
 
 /** Etkileşimli dekorun ekran okuyucu adları */
 const LABELS = {
-  Plant: 'Bitki',
-  Clock: 'Saat',
-  Machine: 'Kahve makinesi',
-  'Mug 5': 'Demlik',
+  Plant: 'Bitki — Instagram hesabımız',
+  Clock: 'Saat — çalışma saatlerimiz',
+  Machine: 'Kahve makinesi — menüye git',
+  'Mug 5': 'Demlik — menüye git',
+}
+
+/*
+ * Tıklanınca bir yere götüren dekor. Balonlarıyla uyumlu seçildi:
+ * saat "kahve saati geldi" der → saatlere, demlik "bir tane daha al" der
+ * → menüye, bitki "hoş geldin" der → Instagram'a.
+ * `external` olanlar yeni sekmede açılıyor.
+ */
+const LINKS = {
+  Clock: { href: '#ziyaret' },
+  Machine: { href: '#menu' },
+  'Mug 5': { href: '#menu' },
+  Plant: { href: cafe.contact.instagramUrl, external: true },
 }
 
 /* Tıklanınca bir şey yapan iki öğe — orijinaldeki gibi */
@@ -126,8 +139,9 @@ export default function CounterScene() {
             )
           }
 
-          /* lamba ve radyo tıklanabilir; geri kalan dekor sadece hover */
+          /* lamba/radyo düğme, saat-makine-demlik-bitki link, gerisi dekor */
           const action = actions[p.name]
+          const link = LINKS[p.name]
           const label = action
             ? CLICK_LABELS[p.name][action.active ? 'on' : 'off']
             : (LABELS[p.name] ?? p.name)
@@ -136,9 +150,11 @@ export default function CounterScene() {
             <InteractiveProp
               key={p.id}
               name={label}
-              className={`fprop${action ? ' fprop--clickable' : ''}`}
+              className={`fprop${action || link ? ' fprop--clickable' : ''}`}
               style={boxStyle(p)}
               scale={false}
+              href={link?.href}
+              external={link?.external}
               onClick={action?.onClick}
               pressed={action ? action.active : undefined}
             >

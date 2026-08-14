@@ -1,8 +1,14 @@
-import cafe from '../config/cafe.js'
+import cafe, { branchMapUrl } from '../config/cafe.js'
 
-/* Ziyaret bilgileri: çalışma saatleri + adres */
+/*
+ * Ziyaret bilgileri: çalışma saatleri + adres.
+ * Buradaki adres merkez şube (listenin ilki); tüm şubeler için Şubeler
+ * bölümüne bakılıyor.
+ */
 
 export default function VisitSection() {
+  const main = cafe.locations[0]
+
   return (
     <section className="visit" id="ziyaret">
       <header className="section-head">
@@ -30,13 +36,13 @@ export default function VisitSection() {
         <div className="visit__col">
           <h3 className="visit__label">Adres</h3>
           <address className="visit__address">
-            {cafe.address.lines.map((l) => (
+            {main.lines.map((l) => (
               <span key={l}>{l}</span>
             ))}
           </address>
           <a
             className="visit__link"
-            href={cafe.address.mapUrl}
+            href={branchMapUrl(main)}
             target="_blank"
             rel="noreferrer"
           >
@@ -47,7 +53,12 @@ export default function VisitSection() {
         <div className="visit__col">
           <h3 className="visit__label">İletişim</h3>
           <ul className="visit__contact">
-            <li><a href={`tel:${cafe.contact.phone.replace(/\s/g, '')}`}>{cafe.contact.phone}</a></li>
+            {cafe.contact.phones.map((p) => (
+              <li key={p.number}>
+                <a href={`tel:${p.number.replace(/\s/g, '')}`}>{p.number}</a>
+                <span className="visit__phone-label">{p.label}</span>
+              </li>
+            ))}
             <li><a href={`mailto:${cafe.contact.email}`}>{cafe.contact.email}</a></li>
             <li>
               <a href={cafe.contact.instagramUrl} target="_blank" rel="noreferrer">
