@@ -1,12 +1,23 @@
-# GoldBeans — kafe sitesi template'i
+# GoldBeans — kafe sitesi
 
 İllüstrasyonlu, etkileşimli bir kafe sitesi. React + Vite.
+
+**Canlı:** <https://xkudcobi.github.io/goldbeans/>
 
 ```bash
 npm install
 npm run dev     # http://localhost:5173
 npm run build   # dist/ klasörüne production çıktısı
 ```
+
+## Yayın
+
+`main`'e her push'ta GitHub Actions build alıp Pages'e atıyor
+(`.github/workflows/deploy.yml`). Site kökte değil `/goldbeans/` altında
+durduğu için iş akışı `BASE_PATH`'i veriyor; `vite.config.js` onu okuyor,
+çizimlerin içindeki `__BASE__` yer tutucusu da `Stage.jsx`'te bu değerle
+doluyor. Deploy sonrası tarayıcı eski sürümü önbellekten gösterebiliyor —
+kontrol ederken sert yenile.
 
 ## Kendine uyarlamak
 
@@ -35,7 +46,9 @@ export const cafe = {
 
 ## Sayfa yapısı
 
-1. **Açılış perdesi** — maroon zemin, 1.6sn (`Preloader.jsx`, `HOLD_MS`)
+1. **Açılış perdesi** — maroon zemin, harf harf yazılan "(selam)",
+   "(yükleniyor...)" satırları (~4sn). Satırlar `cafe.js → loadingLines`,
+   hız `Preloader.jsx` içindeki üç sabit.
 2. **Tezgah sahnesi** — açılıştaki ilk manzara. Tam ekran: üstte biraz boşluk,
    tezgahın tabanı ekranın dibinde. Tuval yüksekliğe göre ölçekleniyor
    (`Stage.jsx`, `fit="height"`); genişlik üst sınır.
@@ -64,9 +77,12 @@ yazılmadı, iki hal de siteden çıkarıldı.
 | **Fincan 1-4** | Pembeye dönüyor + içecek adı/notu/fiyatı beliriyor. Tıklayınca menüye gider. |
 | **Demlik (fincan 5)** | Kahverengiye dönüyor |
 | **Kahve makinesi** | Kahverengiye dönüyor (orijinaldeki GIF `public/art/machine-hover.gif`) |
-| **Lamba** | İp pembeye dönüyor |
-| **Radyo**, **Bitki** | Kahverengiye dönüyor |
-| **Saat** | Görünür değişiklik yok — orijinalde efekt bir animasyon, statik çıkarmayla gelmiyor |
+| **Lamba** | İp pembeye dönüyor, "SUNSET MOOD" balonu |
+| **Radyo**, **Bitki** | Kahverengiye dönüyor + balon |
+| **Saat**, **Makine** | Konuşma balonu çıkıyor |
+
+Balonların yazıları `cafe.js → tips`. Balonun kendisi çizimin parçası,
+satır sayısı sabit — metni değiştirebilirsin, satır ekleyemezsin.
 
 Hover geçişleri kasıtlı olarak **anlık** (transition yok) — yumuşatma eklersen
 illüstrasyonun karakteri kaybolur.
@@ -76,7 +92,7 @@ illüstrasyonun karakteri kaybolur.
 | Öğe | Ne oluyor |
 |---|---|
 | **Lamba** | **Sunset modu** açılıp kapanıyor: zemin `#e5dece`'ye dönüyor, lambadan ışık hüzmesi düşüyor, soldan pencere ışığı vuruyor. Durum `body.is-sunset` — menü, ziyaret, footer da moda giriyor. |
-| **Radyo** | Müziği açıp kapatıyor. Sağ üstteki ses düğmesiyle aynı durum. **Parça henüz seçilmedi** — `cafe.js → music.src` boş; doldurunca kendiliğinden çalar. |
+| **Radyo** | Müziği açıp kapatıyor. **Parça henüz seçilmedi** — `cafe.js → music.src` boş; doldurunca kendiliğinden çalar. Sağ üstteki ses düğmesi kaldırıldı (bkz. `FixedUI.jsx`), parça gelince geri konabilir. |
 | **Fincan 1-4** | Menüye gider |
 | **Kapı** (oda sahnesi) | Şubeler ekranına götürüyor. Açılıp kapanma zaten **hover'da** oluyor (çizimin iki hâli de orijinalden); tıklamaya ayrı animasyon eklenmedi. |
 | **Telefon** (oda sahnesi) | `tel:` ile aramaya götürüyor; hover'da numara beliriyor. Numara `cafe.js → contact.phone` |
@@ -84,8 +100,13 @@ illüstrasyonun karakteri kaybolur.
 **Önemli — kaydırma:** `scrollIntoView({behavior:'smooth'})` bu projede
 güvenilmez çıktı (kimi zaman hiç kıpırdamıyor, kimi zaman yolun ortasında
 kalıyor; araya sert bir `scrollTo` koymak da tarayıcının süren animasyonuyla
-yarışa giriyor). Kapının kaydırması bu yüzden `RoomScene.jsx` içinde rAF ile
-elle animasyonlanıyor.
+yarışa giriyor). Kapının kaydırması bu yüzden `RoomScene.jsx` içinde elle
+animasyonlanıyor.
+
+**Önemli — requestAnimationFrame kullanma.** Sekme arka plandayken rAF hiç
+tetiklenmiyor; kullanıcı siteyi yeni sekmede açtıysa perde sonsuza kadar
+açık kalıyor, kapı hiçbir yere götürmüyor. İkisi de bu yüzden `setInterval`
+ile ve geçen süreye bakarak sürülüyor (`Preloader.jsx`, `RoomScene.jsx`).
 
 **Önemli:** Hover'da çizimin HTML'ini değiştirme. İki hâl de DOM'da duruyor,
 seçimi CSS yapıyor (`.fprop__art--hot`). innerHTML'i hover'da değiştirince
@@ -129,16 +150,18 @@ Tipografi: Fragment Mono (Google Fonts).
   yazıldı ama **çalıştığı doğrulanamadı**; dosyanın başındaki nota bak. İlk iş bunu
   elle test etmek.
 - **Şubeler ekranının tasarımı konuşulmadı** — şu an sade bir liste
-  (`LocationsSection.jsx`, içerik `cafe.js → locations`).
+  (`LocationsSection.jsx`, içerik `cafe.js → locations`). Şube bilgileri
+  örnek veri, gerçek adres/saat değil.
 - **Radyoya parça seçilmedi** — `cafe.js → music.src` boş.
+- İletişim bilgileri (telefon, e-posta, adres) örnek — `cafe.js → contact`.
 - Saatin hover'ı orijinalde animasyon; statik çıkarma onu yakalamıyor. İstenirse
   CSS keyframe ile elle eklenebilir.
 - Kapının açılışı CSS'te perspektifli bir `rotateY` — orijinalin "open" varyantı
   DOM'dan çekilemedi (kapı açılınca sahne unmount oluyor). Görsel olarak aynı iş
   görüyor ama surat "şaşkın" hâline dönmüyor.
 - Bulutlar hâlâ elle yazılmış çizim — sahneler gibi orijinalden çıkarılabilir.
-- Lambanın hover'ındaki "SUNSET MOOD" balonunun koyu zemini çıkarmaya
-  yakalanmadı; yazı krem kaldığı için gündüz modunda görünmüyor.
+- Telefonun hover çizimi hiç basılmıyor: orijinalde balonunda sitenin
+  sahibinin kişisel e-postası vardı. Hover'da sadece numara çıkıyor.
 - Oda sahnesinde krem dolgulu bir figür var (sandalyede oturan biri). Krem
   zeminde görünmüyor, **sunset'te beliriyor**. Orijinalin kendi çizimi;
   istenmezse `chair-0` statik dekordan çıkarılabilir.
