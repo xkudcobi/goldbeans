@@ -44,7 +44,7 @@ export default function VisitSection() {
             className="visit__link"
             href={branchMapUrl(main)}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             Haritada aç →
           </a>
@@ -63,7 +63,7 @@ export default function VisitSection() {
             ))}
             <li><a href={`mailto:${cafe.contact.email}`}>{cafe.contact.email}</a></li>
             <li>
-              <a href={cafe.contact.instagramUrl} target="_blank" rel="noreferrer">
+              <a href={cafe.contact.instagramUrl} target="_blank" rel="noopener noreferrer">
                 {cafe.contact.instagram}
               </a>
             </li>

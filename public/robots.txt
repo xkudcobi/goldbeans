@@ -1,0 +1,3 @@
+# Site tamamen halka açık, gizlenecek bir yol yok — her şey taranabilir.
+User-agent: *
+Allow: /

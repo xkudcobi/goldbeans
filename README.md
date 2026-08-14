@@ -155,7 +155,7 @@ src/
   components/        → etkileşim + bölümler
   styles/            → tokens.css (palet), app.css
 scripts/build-scene.mjs → çıkarılan JSON'u art/*.js'e çeviren üreteç
-docs/                → etkileşim notları, çıkarma tarifi, ham çıkarmalar
+docs/                → etkileşim notları, çıkarma tarifi
 ```
 
 ## Palet

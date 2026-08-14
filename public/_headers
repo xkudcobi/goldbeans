@@ -1,0 +1,50 @@
+# =============================================================
+#  GÜVENLİK BAŞLIKLARI
+# =============================================================
+# Bu dosyayı Netlify ve Cloudflare Pages okuyup her yanıta bu başlıkları
+# ekliyor. GitHub Pages özel başlık desteklemiyor — orada bu dosya sessizce
+# yok sayılır, zararı yok. GitHub Pages'te kalıp yine de bu başlıkları
+# istiyorsan alan adını Cloudflare'e (ücretsiz plan yeter) bağlayıp
+# Rules → Transform Rules → Modify Response Header ile aynılarını
+# ekleyebilirsin. Ayrıntı: README "Yayın" bölümü.
+#
+# CSP ayrıca index.html içinde <meta> olarak da duruyor; oradaki açıklamalar
+# hangi direktifin ne işe yaradığını satır satır anlatıyor. İkisi aynı
+# politikayı söylüyor — BİRİNİ DEĞİŞTİRİRSEN DİĞERİNİ DE DEĞİŞTİR.
+
+/*
+  # Tarayıcı bu politikanın dışına çıkan hiçbir kaynağı yüklemiyor.
+  # <meta>'dakinden tek farkı: frame-ancestors burada var, çünkü o direktif
+  # sadece gerçek HTTP başlığıyla çalışıyor.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+
+  # Siteyi başka bir sayfa iframe'e gömemez. Clickjacking'i (kullanıcıya
+  # görünmez bir katman üstünden sahte tıklama yaptırma) engelliyor.
+  # frame-ancestors'ın eski tarayıcılardaki karşılığı.
+  X-Frame-Options: DENY
+
+  # Sunucunun söylediği dosya türü neyse o. Tarayıcı içeriğe bakıp "bu
+  # aslında script olabilir" diye tahmin yürütmüyor.
+  X-Content-Type-Options: nosniff
+
+  # Dış linklere sadece alan adımız gidiyor, tam sayfa yolu değil.
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Site kamera, mikrofon, konum vs. istemiyor — tarayıcı seviyesinde kapalı.
+  # İleride bir özellik bunlardan birine ihtiyaç duyarsa buradan açılır.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+
+  # Bir yıl boyunca bu alan adına sadece HTTPS ile bağlan; http:// yazan
+  # kullanıcı bile şifresiz bağlantı kurmuyor.
+  #
+  # DİKKAT: preload YOK ve bilerek yok. Preload listesine girmek geri
+  # alınması aylar süren tek yönlü bir karar; alan adı ve tüm alt alan
+  # adları kalıcı olarak HTTPS'e kilitleniyor. Site bir süre sorunsuz
+  # yayında kaldıktan sonra istersen eklersin.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Parmak izli dosya adları (index-a1b2c3.js) — içerik değişince ad da
+# değişiyor, o yüzden sonsuza kadar önbelleğe alınabilir. Güvenlik değil,
+# hız: dönen ziyaretçi bunları bir daha indirmiyor.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -39,11 +39,10 @@ almazsan raflar, makine ve saat **boş** çıkar. `framerScene.js` içindeki
    sınıf ekleniyor (renk oradan geliyor) ve sprite'ın hover parçası ancak
    o an DOM'a giriyor. Öğenin üstüne gerçekten gel, ~900ms bekle, sonra
    hem işaretlemeyi hem yeni sprite id'lerini topla.
-6. Çıkan JSON'u üretece ver. Son çıkarma `docs/scene-export.json` olarak
-   duruyor — `framerScene.js`'i ondan yeniden üretebilirsin:
+6. Çıkan JSON'u üretece ver:
 
    ```bash
-   node scripts/build-scene.mjs docs/scene-export.json
+   node scripts/build-scene.mjs <cikarilan.json>
    ```
 
    Üreteç, sprite karşılığı eksik olan hover'ları **yazmaz** — yoksa o öğe
@@ -58,10 +57,15 @@ yüzdeye çevirme — iç ölçüler px olduğu için çizimler dağılır.
 
 İki sahne çıkarıldı:
 
-| Sahne | Ham çıkarma | Üretilen |
-|---|---|---|
-| Tezgah (1099x545) | `docs/scene-export.json` | `src/art/framerScene.js` |
-| Kapı odası (1122x599) | `docs/room-export.json` | `src/art/framerRoom.js` |
+| Sahne | Üretilen |
+|---|---|
+| Tezgah (1099x545) | `src/art/framerScene.js` |
+| Kapı odası (1122x599) | `src/art/framerRoom.js` |
+
+Ham çıkarma JSON'ları repodan silindi: build'e girmiyorlardı ve içlerinde
+orijinal site sahibinin e-postası duruyordu. Üretilmiş `.js` dosyaları
+kendi başına yeterli — çizimde değişiklik gerekirse doğrudan orayı
+düzenle. Sıfırdan üretmen gerekirse yukarıdaki tarifle yeni çıkarma al.
 
 Oda sahnesi carousel'de ikinci slayt olduğu için ekran dışında duruyor.
 Idle çıkarma orada da doğru (layout hesaplanıyor), ama **hover için sahnenin

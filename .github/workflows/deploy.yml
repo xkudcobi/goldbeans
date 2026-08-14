@@ -30,11 +30,30 @@ jobs:
 
       - run: npx oxlint
 
-      # Site kökte değil /<repo>/ altında duruyor; vite.config.js bunu
+      # Sitenin hangi yolda duracağını belirler; vite.config.js bunu
       # BASE_PATH'ten okuyor, çizimlerdeki __BASE__ de buradan doluyor.
+      #
+      #   ÖZEL ALAN ADI VARSA (public/CNAME dosyası)  → site kökte  → '/'
+      #   YOKSA (kullanici.github.io/<repo> adresi)   → alt yolda   → '/<repo>/'
+      #
+      # Bu ayrım otomatik: alan adına geçerken tek yapman gereken içinde
+      # sadece alan adı yazan bir public/CNAME dosyası eklemek. Elle
+      # değiştirilseydi, unutulduğunda site tüm CSS/JS'ini yanlış yoldan
+      # arayıp bomboş açılırdı.
+      - name: Taban yolunu belirle
+        id: base
+        run: |
+          if [ -f public/CNAME ]; then
+            echo "path=/" >> "$GITHUB_OUTPUT"
+            echo "Özel alan adı bulundu ($(cat public/CNAME)) — taban: /"
+          else
+            echo "path=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
+            echo "Özel alan adı yok — taban: /${{ github.event.repository.name }}/"
+          fi
+
       - run: npm run build
         env:
-          BASE_PATH: /${{ github.event.repository.name }}/
+          BASE_PATH: ${{ steps.base.outputs.path }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

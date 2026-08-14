@@ -3,10 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      İçerik Güvenlik Politikası (CSP) buraya ELLE YAZILMIYOR — build sırasında
+      vite.config.js enjekte ediyor. Sebebi: politika `script-src 'self'`
+      diyor ve geliştirme sunucusu React Fast Refresh için sayfaya satır içi
+      script basıyor. Meta burada sabit dursaydı `npm run dev` kırılırdı.
+      Politikanın kendisi ve satır satır açıklaması vite.config.js içinde.
+    -->
+
+    <!--
+      Dışarı çıkan linklerde (Maps, Instagram, öneri formu) karşı tarafa
+      sadece alan adımız gidiyor, hangi sayfada olduğumuz değil. HTTPS'ten
+      HTTP'ye geçişte hiçbir şey gitmiyor.
+    -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <meta
       name="description"
       content="Kahve, fırın ve sessiz bir köşe. Menü, çalışma saatleri ve adres."
     />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>GoldBeans — köşedeki kahveci</title>
   </head>
   <body>

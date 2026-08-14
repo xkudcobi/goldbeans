@@ -44,7 +44,7 @@ export default function InteractiveProp({
         aria-label={name}
         style={style}
         target={external ? '_blank' : undefined}
-        rel={external ? 'noreferrer' : undefined}
+        rel={external ? 'noopener noreferrer' : undefined}
         {...bind}
       >
         {content}

@@ -45,7 +45,7 @@ export default function LocationsSection() {
                   className="locations__map"
                   href={mapUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
                   Haritada aç →
                 </a>
