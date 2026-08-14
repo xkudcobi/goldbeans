@@ -593,6 +593,92 @@ body.is-sunset .sunlight { opacity: 1; }
   .player__title { font-size: 10px; }
 }
 
+/* ================= Saatler penceresi =================
+   Tezgahtaki saate tıklayınca açılıyor. Bileşen: components/HoursCard.jsx
+*/
+.hours-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  /* zemin çok koyulaşmasın — sahne arkada okunur kalsın */
+  background: rgba(81, 31, 32, 0.32);
+  animation: hours-veil-in 180ms ease;
+}
+@keyframes hours-veil-in { from { opacity: 0; } to { opacity: 1; } }
+
+.hours-card {
+  position: relative;
+  /* "Pazartesi — Cumartesi" tek satıra sığsın diye geniş */
+  width: min(390px, 90vw);
+  padding: 26px 28px 24px;
+  /* odak pencereye alınıyor (klavyeyle kapatmak için) ama halkası
+     görünmesin — kart zaten tek başına ekranda */
+  outline: none;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  background: var(--cream);
+  box-shadow: 0 18px 40px rgba(81, 31, 32, 0.22);
+  animation: hours-card-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+@keyframes hours-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+body.is-sunset .hours-card { background: var(--beige); }
+
+.hours-card__close {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--brown);
+}
+.hours-card__close:hover { color: var(--accent); }
+
+.hours-card__kicker {
+  margin: 0 0 18px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+.hours-card__list { list-style: none; margin: 0; padding: 0; }
+.hours-card__list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 12px;
+  /* gün adı bölünüp noktaları ezmesin */
+  white-space: nowrap;
+}
+.hours-card__dots {
+  flex: 1;
+  height: 1px;
+  min-width: 14px;
+  background-image: radial-gradient(circle, var(--brown) 1px, transparent 1px);
+  background-size: 5px 1px;
+  background-repeat: repeat-x;
+  opacity: 0.5;
+  transform: translateY(-3px);
+}
+.hours-card__time { white-space: nowrap; }
+
+.hours-card__link {
+  display: inline-block;
+  margin-top: 18px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 12px;
+}
+.hours-card__link:hover { color: var(--accent); border-color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hours-veil, .hours-card { animation: none; }
+}
+
 /* ================= Info paneli ================= */
 .info-panel {
   position: absolute;

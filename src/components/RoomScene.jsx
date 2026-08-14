@@ -1,6 +1,7 @@
 import InteractiveProp from './InteractiveProp.jsx'
 import Stage, { Art } from './Stage.jsx'
 import boxStyle from './boxStyle.js'
+import scrollToId from './scrollToId.js'
 import cafe, { telHref } from '../config/cafe.js'
 import { SCENE, PROPS, DEFS } from '../art/framerRoom.js'
 
@@ -46,44 +47,6 @@ const TIPS = {
 
 /** Hover çizimi olmadan basmak için */
 const withoutHot = (p) => ({ ...p, hot: null })
-
-const SCROLL_MS = 620
-
-/*
- * Kaydırmayı kendimiz animasyonluyoruz.
- *
- * NEDEN: `scrollIntoView({behavior:'smooth'})` bu projede güvenilmez —
- * ölçüldü: kimi zaman hiç kıpırdamıyor, kimi zaman yolun ortasında kalıyor.
- * Araya sert bir `scrollTo` koymak da yarışa giriyor (tarayıcının süren
- * animasyonu geri çekiyor).
- *
- * requestAnimationFrame de KULLANMIYORUZ: sekme arka plandayken rAF hiç
- * çalışmıyor ve kapı hiçbir yere götürmüyor (ölçüldü). setInterval arka
- * planda da tikliyor; adımı geçen süreden hesapladığımız için kısılması
- * animasyonu uzatmıyor, sadece daha az kare düşürüyor.
- */
-function scrollToId(id) {
-  const el = document.getElementById(id)
-  if (!el) return
-  const from = window.scrollY
-  const to = el.getBoundingClientRect().top + from
-
-  if (
-    document.hidden ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ) {
-    window.scrollTo(0, to)
-    return
-  }
-
-  const start = performance.now()
-  const id2 = setInterval(() => {
-    const t = Math.min((performance.now() - start) / SCROLL_MS, 1)
-    const ease = 1 - (1 - t) ** 3
-    window.scrollTo(0, from + (to - from) * ease)
-    if (t >= 1) clearInterval(id2)
-  }, 16)
-}
 
 export default function RoomScene() {
   const enterDoor = () => scrollToId('lokasyonlar')

@@ -29,18 +29,23 @@ const LABELS = {
 
 /*
  * Tıklanınca bir yere götüren dekor. Balonlarıyla uyumlu seçildi:
- * saat "kahve saati geldi" der → saatlere, demlik "bir tane daha al" der
- * → menüye, bitki "hoş geldin" der → Instagram'a.
- * `external` olanlar yeni sekmede açılıyor.
+ * demlik "bir tane daha al" der → menüye, bitki "hoş geldin" der →
+ * Instagram'a. `external` olanlar yeni sekmede açılıyor, gerisi yumuşak
+ * kayarak gidiyor (hooks/useSmoothAnchors.js).
+ *
+ * Saat burada DEĞİL: sayfanın en altına atmak yerine küçük bir pencere
+ * açıyor (components/HoursCard.jsx), aşağıdaki `actions`a bak.
  */
 const LINKS = {
-  Clock: { href: '#ziyaret' },
   Machine: { href: '#menu' },
   'Mug 5': { href: '#menu' },
   Plant: { href: cafe.contact.instagramUrl, external: true },
 }
 
-/* Tıklanınca bir şey yapan iki öğe — orijinaldeki gibi */
+/*
+ * Açık/kapalı durumu olan iki öğe — orijinaldeki gibi. Etiket duruma göre
+ * değişiyor. Saatin böyle bir durumu yok, adı LABELS'ten geliyor.
+ */
 const CLICK_LABELS = {
   Lamp: { on: 'Gündüz moduna dön', off: 'Sunset moduna geç' },
   Radio: { on: 'Müziği durdur', off: 'Müziği çal' },
@@ -76,11 +81,13 @@ function replacementsFor(name, time) {
 
 export default function CounterScene() {
   const time = useClock()
-  const { sunset, toggleSunset, playing, togglePlaying } = useApp()
+  const { sunset, toggleSunset, playing, togglePlaying, openHours } = useApp()
 
   const actions = {
     Lamp: { onClick: toggleSunset, active: sunset },
     Radio: { onClick: togglePlaying, active: playing },
+    /* saatin açık/kapalı hali yok, sadece pencereyi açıyor */
+    Clock: { onClick: openHours },
   }
 
   return (
@@ -142,8 +149,9 @@ export default function CounterScene() {
           /* lamba/radyo düğme, saat-makine-demlik-bitki link, gerisi dekor */
           const action = actions[p.name]
           const link = LINKS[p.name]
-          const label = action
-            ? CLICK_LABELS[p.name][action.active ? 'on' : 'off']
+          const toggle = action && CLICK_LABELS[p.name]
+          const label = toggle
+            ? toggle[action.active ? 'on' : 'off']
             : (LABELS[p.name] ?? p.name)
 
           return (

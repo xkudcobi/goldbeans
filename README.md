@@ -92,7 +92,8 @@ illüstrasyonun karakteri kaybolur.
 | Öğe | Ne oluyor |
 |---|---|
 | **Lamba** | **Sunset modu** açılıp kapanıyor: zemin `#e5dece`'ye dönüyor, lambadan ışık hüzmesi düşüyor, soldan pencere ışığı vuruyor. Durum `body.is-sunset` — menü, ziyaret, footer da moda giriyor. |
-| **Radyo** | Müziği açıp kapatıyor ve alttaki **çalar adasını** çıkarıyor (aşağı bak). Parça listesi `cafe.js → music.tracks`. Sağ üstteki ses düğmesi kaldırıldı (bkz. `FixedUI.jsx`) — yerini çalar adası aldı. |
+| **Radyo** | Müziği açıp kapatıyor ve alttaki **çalar adasını** çıkarıyor (aşağı bak). Parça listesi `cafe.js → music.tracks`, **karışık** çalıyor. Sağ üstteki ses düğmesi kaldırıldı (bkz. `FixedUI.jsx`) — yerini çalar adası aldı. |
+| **Saat** | Çalışma saatlerini gösteren küçük bir pencere açıyor (`components/HoursCard.jsx`). Çarpı, dışına tıklama veya Esc kapatıyor. Eskiden sayfanın en altındaki Ziyaret bölümüne atıyordu. |
 | **Fincan 1-4** | Menüye gider |
 | **Kapı** (oda sahnesi) | Şubeler ekranına götürüyor. Açılıp kapanma zaten **hover'da** oluyor (çizimin iki hâli de orijinalden); tıklamaya ayrı animasyon eklenmedi. |
 | **Telefon** (oda sahnesi) | `tel:` ile aramaya götürüyor; hover'da numara beliriyor. Numara `cafe.js → contact.phone` |
@@ -108,16 +109,27 @@ Duraklatınca **kaybolmuyor**: kaybolsaydı müziği geri açmak için tezgaha
 kadar scroll etmek gerekirdi. Radyoya hiç dokunulmadıysa hiç görünmüyor
 (`AppState → radioTouched`). Parça değiştirmek çalma durumunu bozmuyor.
 
-**Önemli — kaydırma:** `scrollIntoView({behavior:'smooth'})` bu projede
-güvenilmez çıktı (kimi zaman hiç kıpırdamıyor, kimi zaman yolun ortasında
-kalıyor; araya sert bir `scrollTo` koymak da tarayıcının süren animasyonuyla
-yarışa giriyor). Kapının kaydırması bu yüzden `RoomScene.jsx` içinde elle
-animasyonlanıyor.
+Liste sayfa açılırken bir kez karıştırılıyor (Fisher-Yates, `AppState`).
+Her parça değişiminde yeniden karıştırılsaydı "önceki şarkı" az önce
+dinlenen parçaya dönmezdi; sıra sayfa yenilenince değişiyor.
+
+**Kaydırma:** Sayfa içi tüm `#` bağlantıları ışınlamak yerine kayarak
+gidiyor — tek bir belge dinleyicisi devralıyor (`hooks/useSmoothAnchors.js`),
+her bağlantıya ayrı kod bağlanmıyor. Orta tık ve Ctrl+tık'a karışmıyor,
+adres çubuğundaki `#menu` kuyruğunu da bilerek yazmıyor (hash'i değiştirmek
+tarayıcıyı kendi sert atlamasını yapmaya çağırıyor, animasyonun üstüne
+biniyor).
+
+**Önemli:** `scrollIntoView({behavior:'smooth'})` bu projede güvenilmez çıktı
+(kimi zaman hiç kıpırdamıyor, kimi zaman yolun ortasında kalıyor; araya sert
+bir `scrollTo` koymak da tarayıcının süren animasyonuyla yarışa giriyor).
+CSS'teki `scroll-behavior: smooth` de aynı motoru kullanıyor. Kaydırma bu
+yüzden `components/scrollToId.js` içinde elle animasyonlanıyor.
 
 **Önemli — requestAnimationFrame kullanma.** Sekme arka plandayken rAF hiç
 tetiklenmiyor; kullanıcı siteyi yeni sekmede açtıysa perde sonsuza kadar
 açık kalıyor, kapı hiçbir yere götürmüyor. İkisi de bu yüzden `setInterval`
-ile ve geçen süreye bakarak sürülüyor (`Preloader.jsx`, `RoomScene.jsx`).
+ile ve geçen süreye bakarak sürülüyor (`Preloader.jsx`, `scrollToId.js`).
 
 **Önemli:** Hover'da çizimin HTML'ini değiştirme. İki hâl de DOM'da duruyor,
 seçimi CSS yapıyor (`.fprop__art--hot`). innerHTML'i hover'da değiştirince

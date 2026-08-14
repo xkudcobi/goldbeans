@@ -13,6 +13,23 @@ import cafe from '../config/cafe.js'
 
 const Ctx = createContext(null)
 
+/*
+ * Fisher-Yates: her sıralama eşit olasılıkta. Kopya üzerinde çalışıyor,
+ * cafe.js'teki listeyi bozmuyor.
+ *
+ * `sort(() => Math.random() - 0.5)` KULLANMA — sık görülen ama bozuk bir
+ * kestirme; sıralama algoritmasına tutarsız cevaplar verdiği için parçalar
+ * eşit dağılmıyor, ilk parça listenin başında kalmaya meyilli oluyor.
+ */
+function shuffle(list) {
+  const a = [...list]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export function AppState({ children }) {
   const [sunset, setSunset] = useState(false)
   const [playing, setPlaying] = useState(false)
@@ -24,11 +41,16 @@ export function AppState({ children }) {
   }, [sunset])
 
   /*
-   * Radyo. config/cafe.js → music.tracks sırayla çalıyor, sonuncu bitince
+   * Radyo. config/cafe.js → music.tracks KARIŞIK çalıyor, sonuncu bitince
    * başa dönüyor. Liste boşsa düğme yine çalışıyor (ikon değişiyor),
    * sadece ses çıkmıyor.
+   *
+   * Karışma sayfa açılırken bir kez yapılıyor (useState'in tembel
+   * başlatıcısı) — her parça değişiminde yeniden karıştırsaydık "önceki
+   * şarkı" düğmesi az önce dinlenen parçaya dönmezdi. Sıra sayfa
+   * yenilenince değişiyor.
    */
-  const tracks = cafe.music?.tracks ?? []
+  const [tracks] = useState(() => shuffle(cafe.music?.tracks ?? []))
   const [track, setTrack] = useState(0)
   const audioRef = useRef(null)
 
@@ -73,10 +95,16 @@ export function AppState({ children }) {
    */
   const [radioTouched, setRadioTouched] = useState(false)
 
+  /* Tezgahtaki saate tıklayınca açılan küçük saatler penceresi */
+  const [hoursOpen, setHoursOpen] = useState(false)
+
   const value = useMemo(
     () => ({
       sunset,
       toggleSunset: () => setSunset((v) => !v),
+      hoursOpen,
+      openHours: () => setHoursOpen(true),
+      closeHours: () => setHoursOpen(false),
       playing,
       togglePlaying: () => {
         setRadioTouched(true)
@@ -91,7 +119,7 @@ export function AppState({ children }) {
       prevTrack: () =>
         tracks.length && setTrack((i) => (i - 1 + tracks.length) % tracks.length),
     }),
-    [sunset, playing, radioTouched, track, tracks],
+    [sunset, playing, radioTouched, track, tracks, hoursOpen],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

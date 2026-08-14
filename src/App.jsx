@@ -3,6 +3,8 @@ import { AppState } from './state/AppState.jsx'
 import Preloader from './components/Preloader.jsx'
 import FixedUI from './components/FixedUI.jsx'
 import NowPlaying from './components/NowPlaying.jsx'
+import HoursCard from './components/HoursCard.jsx'
+import useSmoothAnchors from './hooks/useSmoothAnchors.js'
 import CounterScene from './components/CounterScene.jsx'
 import RoomScene from './components/RoomScene.jsx'
 import LocationsSection from './components/LocationsSection.jsx'
@@ -29,6 +31,9 @@ import './styles/app.css'
 export default function App() {
   const [ready, setReady] = useState(false)
 
+  /* sayfa içi '#' bağlantıları ışınlamak yerine kayarak gitsin */
+  useSmoothAnchors()
+
   return (
     <AppState>
       <Preloader onDone={() => setReady(true)} />
@@ -43,6 +48,8 @@ export default function App() {
       </main>
       {/* radyo açıldıktan sonra altta ortada duran çalar adası */}
       <NowPlaying />
+      {/* tezgahtaki saate tıklayınca açılan saatler penceresi */}
+      <HoursCard />
     </AppState>
   )
 }
