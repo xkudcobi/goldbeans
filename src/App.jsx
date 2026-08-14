@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { AppState } from './state/AppState.jsx'
 import Preloader from './components/Preloader.jsx'
 import FixedUI from './components/FixedUI.jsx'
+import NowPlaying from './components/NowPlaying.jsx'
 import CounterScene from './components/CounterScene.jsx'
 import RoomScene from './components/RoomScene.jsx'
 import LocationsSection from './components/LocationsSection.jsx'
@@ -40,6 +41,8 @@ export default function App() {
         <VisitSection />
         <Footer />
       </main>
+      {/* radyo açıldıktan sonra altta ortada duran çalar adası */}
+      <NowPlaying />
     </AppState>
   )
 }

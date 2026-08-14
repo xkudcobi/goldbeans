@@ -67,14 +67,31 @@ export function AppState({ children }) {
     else el.pause()
   }, [playing])
 
+  /*
+   * Radyo bir kez açıldıktan sonra alttaki çalar adası ekranda kalıyor —
+   * duraklatınca kaybolsaydı tekrar başlatmak için radyoyu bulmak gerekirdi.
+   */
+  const [radioTouched, setRadioTouched] = useState(false)
+
   const value = useMemo(
     () => ({
       sunset,
       toggleSunset: () => setSunset((v) => !v),
       playing,
-      togglePlaying: () => setPlaying((v) => !v),
+      togglePlaying: () => {
+        setRadioTouched(true)
+        setPlaying((v) => !v)
+      },
+      /* alttaki çalar adası için (components/NowPlaying.jsx) */
+      radioTouched,
+      tracks,
+      track,
+      /* parça değiştirmek çalma durumunu bozmuyor: duruyorsa duruyor kalıyor */
+      nextTrack: () => tracks.length && setTrack((i) => (i + 1) % tracks.length),
+      prevTrack: () =>
+        tracks.length && setTrack((i) => (i - 1 + tracks.length) % tracks.length),
     }),
-    [sunset, playing],
+    [sunset, playing, radioTouched, track, tracks],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

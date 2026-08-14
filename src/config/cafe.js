@@ -91,7 +91,7 @@ export const cafe = {
      * Oda. Telefonun balonu hiç basılmıyor (orijinalde sitenin sahibinin
      * e-postası vardı) — hover'da sadece numara çıkıyor, bkz. RoomScene.
      */
-    roomMug: ['ISIRMAK VE', 'YAZMAK İÇİN'],
+    roomMug: ['ÖNERİLERİNİ', 'DUYALIM'],
   },
 
   /*
@@ -186,6 +186,18 @@ export const cafe = {
     instagram: '@goldbeanscoffeehouse',
     instagramUrl: 'https://www.instagram.com/goldbeanscoffeehouse/',
   },
+
+  /*
+   * Öneri ve şikayet formu — oda sahnesindeki kalemliğe tıklayınca yeni
+   * sekmede açılıyor (components/RoomScene.jsx).
+   *
+   * Google Forms'ta formu aç → Gönder → bağlantı sekmesi → çıkan adresi
+   * buraya yapıştır (.../viewform ile biten hâli).
+   *
+   * BOŞ BIRAKILIRSA kalemlik tıklanmaz olur, sadece balonu çıkar — yani
+   * kırık link yerine hiç link olmaz.
+   */
+  suggestionFormUrl: 'https://forms.gle/hXJZd1bkiJBvHsk26',
 
   /*
    * Şubeler — kapıdan girince açılan ekran.

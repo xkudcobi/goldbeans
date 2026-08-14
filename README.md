@@ -92,10 +92,21 @@ illüstrasyonun karakteri kaybolur.
 | Öğe | Ne oluyor |
 |---|---|
 | **Lamba** | **Sunset modu** açılıp kapanıyor: zemin `#e5dece`'ye dönüyor, lambadan ışık hüzmesi düşüyor, soldan pencere ışığı vuruyor. Durum `body.is-sunset` — menü, ziyaret, footer da moda giriyor. |
-| **Radyo** | Müziği açıp kapatıyor. **Parça henüz seçilmedi** — `cafe.js → music.src` boş; doldurunca kendiliğinden çalar. Sağ üstteki ses düğmesi kaldırıldı (bkz. `FixedUI.jsx`), parça gelince geri konabilir. |
+| **Radyo** | Müziği açıp kapatıyor ve alttaki **çalar adasını** çıkarıyor (aşağı bak). Parça listesi `cafe.js → music.tracks`. Sağ üstteki ses düğmesi kaldırıldı (bkz. `FixedUI.jsx`) — yerini çalar adası aldı. |
 | **Fincan 1-4** | Menüye gider |
 | **Kapı** (oda sahnesi) | Şubeler ekranına götürüyor. Açılıp kapanma zaten **hover'da** oluyor (çizimin iki hâli de orijinalden); tıklamaya ayrı animasyon eklenmedi. |
 | **Telefon** (oda sahnesi) | `tel:` ile aramaya götürüyor; hover'da numara beliriyor. Numara `cafe.js → contact.phone` |
+| **Kalemlik** (oda sahnesi) | Öneri/şikayet formunu yeni sekmede açıyor; hover balonu "ÖNERİLERİNİ DUYALIM" diyor. Adres `cafe.js → suggestionFormUrl` — boş bırakılırsa link basılmıyor, kalemlik dekora dönüyor. |
+
+### Çalar adası
+
+Radyoya ilk dokunulduğunda ekranın alt-ortasında beliren küçük yüzen kutu
+(`components/NowPlaying.jsx`): parça adı, ekolayzır, önceki/durdur/sonraki.
+`position: fixed` — sayfanın her yerinde aynı yerde duruyor.
+
+Duraklatınca **kaybolmuyor**: kaybolsaydı müziği geri açmak için tezgaha
+kadar scroll etmek gerekirdi. Radyoya hiç dokunulmadıysa hiç görünmüyor
+(`AppState → radioTouched`). Parça değiştirmek çalma durumunu bozmuyor.
 
 **Önemli — kaydırma:** `scrollIntoView({behavior:'smooth'})` bu projede
 güvenilmez çıktı (kimi zaman hiç kıpırdamıyor, kimi zaman yolun ortasında
@@ -150,10 +161,7 @@ Tipografi: Fragment Mono (Google Fonts).
   yazıldı ama **çalıştığı doğrulanamadı**; dosyanın başındaki nota bak. İlk iş bunu
   elle test etmek.
 - **Şubeler ekranının tasarımı konuşulmadı** — şu an sade bir liste
-  (`LocationsSection.jsx`, içerik `cafe.js → locations`). Şube bilgileri
-  örnek veri, gerçek adres/saat değil.
-- **Radyoya parça seçilmedi** — `cafe.js → music.src` boş.
-- İletişim bilgileri (telefon, e-posta, adres) örnek — `cafe.js → contact`.
+  (`LocationsSection.jsx`, içerik `cafe.js → locations`).
 - Saatin hover'ı orijinalde animasyon; statik çıkarma onu yakalamıyor. İstenirse
   CSS keyframe ile elle eklenebilir.
 - Kapının açılışı CSS'te perspektifli bir `rotateY` — orijinalin "open" varyantı

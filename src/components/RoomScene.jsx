@@ -20,7 +20,7 @@ const LABELS = {
   'door-2': 'Kapı — şubelerimize git',
   'column-4': 'Sehpa',
   'chair-5': 'Sandalye',
-  'mug-6': 'Fincan',
+  'mug-6': 'Kalemlik',
   'table-7': 'Masa',
 }
 
@@ -161,14 +161,22 @@ export default function RoomScene() {
             )
           }
 
+          /*
+           * Kalemlik: öneri/şikayet formuna götürüyor — balonu da zaten
+           * "ÖNERİLERİNİ DUYALIM" diyor (cafe.js → tips.roomMug).
+           * Adres cafe.js'te boşsa link basılmıyor, dekor olarak kalıyor.
+           */
           if (p.id === 'mug-6') {
+            const form = cafe.suggestionFormUrl
             return (
               <InteractiveProp
                 key={p.id}
-                name={LABELS[p.id]}
-                className="fprop"
+                name={form ? 'Önerilerini duyalım — öneri ve şikayet formu' : LABELS[p.id]}
+                className={`fprop${form ? ' fprop--clickable' : ''}`}
                 style={boxStyle(p)}
                 scale={false}
+                href={form || undefined}
+                external={Boolean(form)}
               >
                 <Art prop={p} replace={TIPS['mug-6']} />
               </InteractiveProp>

@@ -500,6 +500,99 @@ body.is-sunset .sunlight { opacity: 1; }
   opacity: 0.35;
 }
 
+/* ================= Çalar adası =================
+   Radyo açılınca ekranın alt-ortasında beliren küçük yüzen kutu.
+   position:fixed — sayfanın neresinde olursan ol aynı yerde duruyor.
+   Bileşen: components/NowPlaying.jsx
+*/
+.player {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(420px, 92vw);
+  padding: 10px 12px 10px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--cream);
+  box-shadow: 0 10px 26px rgba(81, 31, 32, 0.28);
+  /* translateX ortalıyor, float sadece 6px'lik yükselip alçalma */
+  transform: translateX(-50%);
+  animation: player-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
+             player-float 4.5s ease-in-out 320ms infinite;
+}
+
+@keyframes player-in {
+  from { opacity: 0; transform: translate(-50%, 18px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes player-float {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -6px); }
+}
+
+/* ekolayzır — sadece çalarken oynuyor, duraklatınca donuk kalıyor */
+.player__eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+  flex: none;
+}
+.player__eq i {
+  width: 3px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent-soft);
+}
+.player.is-playing .player__eq i { animation: player-eq 900ms ease-in-out infinite; }
+.player.is-playing .player__eq i:nth-child(2) { animation-delay: 180ms; }
+.player.is-playing .player__eq i:nth-child(3) { animation-delay: 360ms; }
+@keyframes player-eq {
+  0%, 100% { height: 4px; }
+  50%      { height: 14px; }
+}
+
+/* Uzun parça adları kutuyu şişirmesin — tek satır, taşan yer üç nokta */
+.player__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player__btns { display: flex; align-items: center; gap: 2px; flex: none; }
+.player__btn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cream);
+  transition: opacity 160ms ease;
+}
+.player__btn svg { width: 18px; height: 18px; display: block; }
+.player__btn .line-art { stroke: var(--cream); }
+.player__btn--play .line-art { stroke-width: 2.4; }
+.player__btn:hover { opacity: 0.6; }
+.player__btn:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .player { animation: none; }
+  .player.is-playing .player__eq i { animation: none; height: 10px; }
+}
+
+@media (max-width: 640px) {
+  .player { bottom: 16px; gap: 10px; padding-left: 13px; }
+  .player__title { font-size: 10px; }
+}
+
 /* ================= Info paneli ================= */
 .info-panel {
   position: absolute;
