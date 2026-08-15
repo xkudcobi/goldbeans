@@ -47,6 +47,11 @@ const VENDORED = [
    * geçiyor. Render sırasında zaten değiştiriliyor ama ham hâli pakete
    * girmesin diye burada da yer tutucuya çevriliyor.
    * RoomScene.jsx bu yer tutucuyu cafe.contact.email ile dolduruyor.
+   *
+   * Adresin kendisini buraya YAZMIYORUZ — bu dosya repoda duruyor ve
+   * adresi temizlemek için yazılmış bir satırın adresi barındırması
+   * anlamsız. Genel bir e-posta kalıbı aynı işi görüyor: çıkarılan
+   * işaretlemede başka e-posta zaten geçmiyor.
    */
   [/[\w.+-]+@[\w-]+\.[\w.]+/g, 'E-POSTA-ADRESI'],
   /* aynı balonun diğer iki satırı da pakete girmesin */
