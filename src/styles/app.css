@@ -119,6 +119,80 @@ body.is-sunset .fixed-veil { background: var(--beige); }
   min-height: calc(100dvh - 92px - var(--safe-top));
   padding-bottom: 0;
 }
+
+/* ================= Duvar tabelası (sadece telefon) =================
+   Tezgahın üstündeki boş duvara asılı GoldBeans tabelası. Varsayılan
+   gizli; "Dar ekran" bölümü açıyor. Bileşen: CounterScene.jsx
+*/
+.wallsign {
+  display: none;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  /* tabelanın ipleri yukarı uzanıyor, üstte pay kalsın */
+  padding: 40px 0 24px;
+}
+.wallsign__board {
+  position: relative;
+  width: min(78vw, 300px);
+  padding: 22px 22px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  text-align: center;
+  /* çok hafif sallanıyor — asılı olduğu belli olsun */
+  transform-origin: top center;
+  animation: sign-sway 5s ease-in-out infinite;
+}
+/* iki ip, tabelanın üst köşelerinden tavana */
+.wallsign__board::before,
+.wallsign__board::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  width: 2px;
+  height: 40px;
+  background: var(--ink);
+}
+.wallsign__board::before { left: 18%; }
+.wallsign__board::after { right: 18%; }
+.wallsign .logo { width: 100%; }
+.wallsign__tagline {
+  margin: 10px 0 0;
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  color: var(--brown);
+}
+@keyframes sign-sway {
+  0%, 100% { transform: rotate(-0.8deg); }
+  50%      { transform: rotate(0.8deg); }
+}
+
+/* Tezgahın dibindeki "aşağıda daha fazlası var" oku (sadece telefon) */
+.scroll-cue {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: calc(14px + var(--safe-bottom));
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: cue-bob 1.8s ease-in-out infinite;
+}
+.scroll-cue svg { width: 22px; height: 22px; }
+.scroll-cue .line-art { stroke: var(--cream); stroke-width: 2.4; }
+@keyframes cue-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallsign__board, .scroll-cue { animation: none; }
+}
+
 /* ================= Sahne tuvali =================
    Çizimler orijinal siteden çıkarıldı (src/art/framerScene.js ve
    framerRoom.js) ve sabit bir tuvale göre px olarak konumlanıyor. Tuval
@@ -1423,16 +1497,27 @@ body.is-sunset .branch-dialog { background: var(--beige); }
 
   /* --- Tezgah sahnesi --- */
   /*
-   * Masaüstünde tezgah ekranı dolduruyor. Telefonda tuval genişliğe
-   * sığdırılınca ~180px'lik bir şeride iniyor; 100vh'lik kutuda bu, üstte
-   * yarım ekran boşluk demek. Sahne kendi boyuna dönüyor, sayfa da
-   * doğrudan menüye akıyor.
+   * Masaüstündeki gibi tezgah ilk ekranı tek başına dolduruyor: kafeye
+   * girmiş gibi, altında menü görünmüyor. Tuval genişliğe sığınca ~190px'lik
+   * bir şerit kalıyor; o şerit dipte, üstteki boş duvara tabela asılıyor
+   * (.wallsign). Menüye dipteki ok (.scroll-cue) ya da kaydırarak iniliyor.
+   *
+   * svh: adres çubuğu AÇIKKEN görünen yükseklik. dvh kullanırsak sayfa
+   * ilk açıldığında tezgahın dibi adres çubuğunun arkasında kalıyor.
    */
   /* Sıra önemli: .scene--counter de bir .scene, ikisi de aynı ağırlıkta.
      Genel kural önce gelmezse tezgahın kendi alt boşluğunu eziyor. */
   /* üstteki boşluk "dokun, keşfet" rozetine yer bırakıyor (bkz. .stage__hint) */
   .scene { padding: 44px 0 40px; }
-  .scene--counter { min-height: 0; padding-bottom: 24px; }
+  .scene--counter {
+    min-height: calc(100vh - 68px - var(--safe-top));
+    min-height: calc(100svh - 68px - var(--safe-top));
+    padding: 16px 0 0;
+  }
+  /* tuval kendi boyunda kalsın, artan yükseklik tabelanın */
+  .scene--counter .stage--fit { flex: none; }
+  .wallsign { display: flex; }
+  .scroll-cue { display: grid; }
 
   /* Çizim ekranın kenarlarına kadar gitsin — 94vw'de kalan ince şerit
      sahneyi olduğundan da küçük gösteriyor. `100%` yazıyoruz, `100vw`
@@ -1543,6 +1628,9 @@ body.is-sunset .branch-dialog { background: var(--beige); }
  */
 @media (max-height: 520px) and (orientation: landscape) {
   .scene--counter { min-height: 0; }
+  /* yatayda duvara yer yok — tabela ve ok sadece dikey telefonda */
+  .wallsign,
+  .scroll-cue { display: none; }
   .fixed-logo { width: 116px; top: calc(8px + var(--safe-top)); }
   .fixed-nav { top: calc(16px + var(--safe-top)); }
   .fixed-veil { height: calc(52px + var(--safe-top)); }

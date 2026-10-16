@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import InteractiveProp from './InteractiveProp.jsx'
+import Logo from './Logo.jsx'
 import Stage, { Art } from './Stage.jsx'
 import boxStyle from './boxStyle.js'
 import cafe from '../config/cafe.js'
@@ -92,6 +93,22 @@ export default function CounterScene() {
 
   return (
     <section className="scene scene--counter" id="tezgah">
+      {/*
+       * Duvardaki tabela — SADECE telefonda (app.css → .wallsign).
+       *
+       * Masaüstünde tezgah ekranı dolduruyor, kafeye girmiş gibi oluyorsun.
+       * Telefonda geniş çizim ekranın ancak alt dörtte birini kaplıyor;
+       * sahne yine tam ekran, çizim dipte, üstteki boş duvara da gerçek
+       * bir kafedeki gibi bir tabela asılıyor. Logo üst başlıkta zaten var,
+       * burası süs: ekran okuyucudan gizli.
+       */}
+      <div className="wallsign" aria-hidden="true">
+        <div className="wallsign__board">
+          <Logo />
+          <p className="wallsign__tagline">{cafe.tagline}</p>
+        </div>
+      </div>
+
       <Stage
         scene={SCENE}
         defs={DEFS}
@@ -176,6 +193,13 @@ export default function CounterScene() {
           )
         })}
       </Stage>
+
+      {/* telefonda tezgahın dibinde: "aşağıda daha fazlası var" */}
+      <a className="scroll-cue" href="#menu" aria-label="Menüye in">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path className="line-art" d="M6 9.5l6 6 6-6" />
+        </svg>
+      </a>
     </section>
   )
 }
