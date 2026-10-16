@@ -155,7 +155,17 @@ body.is-sunset .fixed-veil { background: var(--beige); }
 }
 .wallsign__board::before { left: 18%; }
 .wallsign__board::after { right: 18%; }
-.wallsign .logo { width: 100%; }
+/* Bungee yalnızca büyük harf çiziyor: "GoldBeans" → GOLDBEANS.
+   Boyut ekran genişliğine bağlı, 9 harf 320px'lik telefonda da sığıyor. */
+.wallsign__name {
+  margin: 0;
+  font-family: 'Bungee Inline', var(--mono);
+  font-weight: 400;
+  font-size: clamp(24px, 8.6vw, 36px);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
 .wallsign__tagline {
   margin: 10px 0 0;
   font-size: 12px;

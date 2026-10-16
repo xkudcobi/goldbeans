@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&display=swap');
+/* Bungee Inline sadece telefondaki duvar tabelasında (app.css → .wallsign__name).
+   Tarayıcı font dosyasını ancak o yazı ekrana basılınca indiriyor —
+   masaüstünde tabela gizli, orada hiç inmiyor. */
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Fragment+Mono:ital@0;1&display=swap');
 
 :root {
   /* Orijinal siteden alınan Framer CSS token'ları */
