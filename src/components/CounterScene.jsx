@@ -97,12 +97,7 @@ export default function CounterScene() {
         defs={DEFS}
         className="counter-stage"
         fit="height"
-        header={
-          <p className="scene__kicker">
-            <span className="pulser" aria-hidden="true" />
-            {cafe.counterKicker}
-          </p>
-        }
+        label="Tezgah"
       >
         {/* sunset'te lambadan düşen ışık hüzmesi ve pencere ışığı */}
         <div className="sunlight" aria-hidden="true">
@@ -138,7 +133,7 @@ export default function CounterScene() {
                 {drink && (
                   <span className="mug__label" aria-hidden="true">
                     <span className="mug__label-name">{drink.name}</span>
-                    <span className="mug__label-note">{drink.note}</span>
+                    {drink.note && <span className="mug__label-note">{drink.note}</span>}
                     <span className="mug__label-price">{drink.price}</span>
                   </span>
                 )}

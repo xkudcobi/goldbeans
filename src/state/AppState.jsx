@@ -1,11 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import cafe from '../config/cafe.js'
 
 /*
- * Sitenin iki global durumu — ikisi de tezgahtaki bir öğeden tetikleniyor:
+ * Sitenin global durumları — çoğu tezgahtaki bir öğeden tetikleniyor:
  *
  *   sunset  → lambaya tıklayınca. Sayfanın tamamı akşam paletine geçiyor.
- *   playing → radyoya (veya sağ üstteki düğmeye) tıklayınca.
+ *   playing → radyoya (veya alttaki çalar adasına) tıklayınca.
+ *   ready   → açılış perdesi kalkınca. Sahnelerin ipucu animasyonu bunu bekliyor.
  *
  * Prop olarak taşımak yerine context: tetikleyen öğe sahnenin derinlerinde
  * (CounterScene → InteractiveProp), dinleyen ise en üstte (App, FixedUI).
@@ -53,12 +54,24 @@ export function AppState({ children }) {
   const [tracks] = useState(() => shuffle(cafe.music?.tracks ?? []))
   const [track, setTrack] = useState(0)
   const audioRef = useRef(null)
+  /* Son çalma durumu — parça değişiminde "çalıyor muyduk?" sorusu için */
+  const playingRef = useRef(playing)
+
+  /*
+   * Çalma isteği reddedilirse (tarayıcının otomatik oynatma engeli, dosya
+   * bulunamadı) düğme "çalıyor" görünüp sessiz kalmasın.
+   */
+  const play = useCallback((el) => {
+    el.play().catch(() => setPlaying(false))
+  }, [])
 
   /* Tek bir Audio nesnesi; parça bitince sıradakine geçiyor */
   useEffect(() => {
     if (!tracks.length) return
     const el = (audioRef.current = new Audio())
     el.volume = cafe.music.volume ?? 0.5
+    /* tek parçalık listede 'ended' sırayı değiştirmiyor, şarkı susuyordu */
+    el.loop = tracks.length === 1
     const next = () => setTrack((i) => (i + 1) % tracks.length)
     el.addEventListener('ended', next)
     return () => {
@@ -66,7 +79,7 @@ export function AppState({ children }) {
       el.pause()
       audioRef.current = null
     }
-  }, [])
+  }, [tracks])
 
   /*
    * Sıra değişince kaynağı yükle — çalıyorsak ara vermeden devam et.
@@ -78,16 +91,17 @@ export function AppState({ children }) {
     const el = audioRef.current
     if (!el || !tracks.length) return
     el.src = encodeURI(import.meta.env.BASE_URL + tracks[track].src.replace(/^\//, ''))
-    if (playing) el.play().catch(() => {})
-  }, [track])
+    if (playingRef.current) play(el)
+  }, [track, tracks, play])
 
   /* Radyoya tıklama */
   useEffect(() => {
+    playingRef.current = playing
     const el = audioRef.current
     if (!el) return
-    if (playing) el.play().catch(() => {})
+    if (playing) play(el)
     else el.pause()
-  }, [playing])
+  }, [playing, play])
 
   /*
    * Radyo bir kez açıldıktan sonra alttaki çalar adası ekranda kalıyor —
@@ -98,28 +112,48 @@ export function AppState({ children }) {
   /* Tezgahtaki saate tıklayınca açılan küçük saatler penceresi */
   const [hoursOpen, setHoursOpen] = useState(false)
 
-  const value = useMemo(
+  /* Açılış perdesi kalktı mı — bkz. sahnelerin ipucu animasyonu (Stage.jsx) */
+  const [ready, setReady] = useState(false)
+
+  /*
+   * Eylemler sabit kimlikte: her render'da yeni fonksiyon üretilseydi
+   * onlara bağlı effect'ler (HoursCard'ın odak/Esc dinleyicisi) her parça
+   * değişiminde boşuna yeniden kurulurdu.
+   */
+  const actions = useMemo(
     () => ({
-      sunset,
       toggleSunset: () => setSunset((v) => !v),
-      hoursOpen,
       openHours: () => setHoursOpen(true),
       closeHours: () => setHoursOpen(false),
-      playing,
+      markReady: () => setReady(true),
       togglePlaying: () => {
         setRadioTouched(true)
         setPlaying((v) => !v)
       },
+      /* parça değiştirmek çalma durumunu bozmuyor: duruyorsa duruyor kalıyor */
+      nextTrack: () => {
+        if (tracks.length) setTrack((i) => (i + 1) % tracks.length)
+      },
+      prevTrack: () => {
+        if (tracks.length) setTrack((i) => (i - 1 + tracks.length) % tracks.length)
+      },
+    }),
+    [tracks],
+  )
+
+  const value = useMemo(
+    () => ({
+      ...actions,
+      sunset,
+      hoursOpen,
+      playing,
+      ready,
       /* alttaki çalar adası için (components/NowPlaying.jsx) */
       radioTouched,
       tracks,
       track,
-      /* parça değiştirmek çalma durumunu bozmuyor: duruyorsa duruyor kalıyor */
-      nextTrack: () => tracks.length && setTrack((i) => (i + 1) % tracks.length),
-      prevTrack: () =>
-        tracks.length && setTrack((i) => (i - 1 + tracks.length) % tracks.length),
     }),
-    [sunset, playing, radioTouched, track, tracks, hoursOpen],
+    [actions, sunset, playing, radioTouched, track, tracks, hoursOpen, ready],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

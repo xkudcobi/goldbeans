@@ -51,6 +51,9 @@ html {
      Ölçekleme bize ait olsun. */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Pencere açılınca sayfa kaydırması kilitleniyor (hooks/useDialog.js);
+     kaydırma çubuğu kaybolup sahne yana zıplamasın diye yeri hep ayrılı. */
+  scrollbar-gutter: stable;
 }
 
 body {

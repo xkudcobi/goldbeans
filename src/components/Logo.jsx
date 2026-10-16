@@ -28,6 +28,8 @@ export default function Logo() {
   const [frame, setFrame] = useState(0)
 
   useEffect(() => {
+    /* hareket azaltmayı seçen kullanıcıda logo sabit dursun */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const id = setInterval(() => setFrame((f) => (f + 1) % FRAMES), FRAME_MS)
     return () => clearInterval(id)
   }, [])

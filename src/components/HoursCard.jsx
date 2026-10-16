@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import cafe from '../config/cafe.js'
 import { useApp } from '../state/AppState.jsx'
+import useDialog from '../hooks/useDialog.js'
 
 /*
  * Tezgahtaki saate tıklayınca açılan küçük pencere — çalışma saatleri.
@@ -17,22 +18,11 @@ export default function HoursCard() {
   const cardRef = useRef(null)
 
   /*
-   * Esc her yerden kapatsın — pencerenin içine odaklanılmamış olabilir.
-   * Dinleyici sadece pencere açıkken bağlı.
+   * Esc, kaydırma kilidi, odak — bkz. hooks/useDialog.js. Odak çarpıya
+   * değil kartın kendisine veriliyor: çarpının odak halkası kutunun
+   * köşesinden taşıp göze batıyordu.
    */
-  useEffect(() => {
-    if (!hoursOpen) return
-    const onKey = (e) => e.key === 'Escape' && closeHours()
-    document.addEventListener('keydown', onKey)
-    /*
-     * Odak pencereye geçsin: Tab ile gezinen kullanıcı arkadaki sahnenin
-     * ortasında kalmasın, ilk Tab kartın içine düşsün. Odak çarpıya değil
-     * kartın kendisine veriliyor — çarpının odak halkası kutunun köşesinden
-     * taşıp göze batıyordu.
-     */
-    cardRef.current?.focus()
-    return () => document.removeEventListener('keydown', onKey)
-  }, [hoursOpen, closeHours])
+  useDialog(hoursOpen, closeHours, cardRef)
 
   if (!hoursOpen) return null
 
@@ -57,10 +47,7 @@ export default function HoursCard() {
           ×
         </button>
 
-        <p className="hours-card__kicker" id="hours-card-title">
-          <span className="pulser" aria-hidden="true" />
-          AÇIK SAATLER
-        </p>
+        <h2 className="hours-card__kicker" id="hours-card-title">AÇIK SAATLER</h2>
 
         <ul className="hours-card__list">
           {cafe.hours.map((h) => (

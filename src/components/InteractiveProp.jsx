@@ -19,6 +19,12 @@ import useHover from '../hooks/useHover.js'
  * beklemenin amacı fiyat/bilgi etiketini okuyabilmen.
  */
 
+/** İkinci dokunuşun ne yapacağı — "tekrar dokun" rozetinin yazısı */
+function againText(href, external) {
+  if (href.startsWith('tel:')) return 'aramak için tekrar dokun'
+  return external ? 'açmak için tekrar dokun' : 'gitmek için tekrar dokun'
+}
+
 export default function InteractiveProp({
   name,
   className = '',
@@ -30,11 +36,12 @@ export default function InteractiveProp({
   scale = true,
   children,
 }) {
-  const [hot, bind, guard] = useHover()
+  const [hot, bind, guard, armed] = useHover()
 
   const cls = [
     'iprop',
     hot ? 'is-hot' : '',
+    armed ? 'is-armed' : '',
     pressed ? 'is-on' : '',
     scale ? 'iprop--scales' : '',
     className,
@@ -60,6 +67,14 @@ export default function InteractiveProp({
         {...bind}
       >
         {content}
+        {/*
+         * İlk dokunuştan sonra "bu çalışmadı" sanılmasın — balonun yanında
+         * ikinci dokunuşun ne yapacağı yazıyor. Sadece parmakla, sadece
+         * bekçi kuruluyken görünüyor.
+         */}
+        <span className="iprop__again" aria-hidden="true">
+          {againText(href, external)}
+        </span>
       </a>
     )
   }

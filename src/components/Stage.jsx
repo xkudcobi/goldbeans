@@ -1,4 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react'
+import { useApp } from '../state/AppState.jsx'
+import { HandIcon } from './icons.jsx'
 
 /*
  * İki sahnenin de ortak iskeleti.
@@ -12,7 +14,7 @@ import { memo, useEffect, useRef, useState } from 'react'
  * denk gelsin diye (tuvalin alt kenarı zaten tezgahın tabanı).
  */
 
-function useStageScale(scene, fitHeight, headerRef) {
+function useStageScale(scene, fitHeight) {
   const ref = useRef(null)
   const [scale, setScale] = useState(1)
 
@@ -20,9 +22,7 @@ function useStageScale(scene, fitHeight, headerRef) {
     const el = ref.current
     if (!el) return
     const ro = new ResizeObserver(([entry]) => {
-      const { width } = entry.contentRect
-      /* başlık da tuvalin payından yiyor */
-      const height = entry.contentRect.height - (headerRef.current?.offsetHeight ?? 0)
+      const { width, height } = entry.contentRect
       let next = width / scene.w
       if (fitHeight && height > 0) {
         /* Yüksekliği doldurmak için 1'in üstüne çıkabiliyor — çizimler
@@ -40,9 +40,104 @@ function useStageScale(scene, fitHeight, headerRef) {
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [scene.w, scene.h, fitHeight, headerRef])
+  }, [scene.w, scene.h, fitHeight])
 
   return [ref, scale]
+}
+
+/*
+ * "Buradaki her şey tıklanıyor" ipucu.
+ *
+ * Mobil testlerde kullanıcıların çoğu sahnedeki çizimlerin dokunulabilir
+ * olduğunu anlamadı — dokunmatikte imleç değişmiyor, hover yok. Sahne
+ * ekrana girince tıklanabilir her öğenin üstünde soldan sağa sırayla bir
+ * halka yayılıyor, öğe hafifçe zıplıyor, üstte "dokun, keşfet" yazıyor.
+ *
+ * - Açılış perdesi inmeden başlamıyor (perdenin arkasında oynasa boşa gider).
+ * - Sahne ekrandan çıkınca duruyor, geri gelince devam ediyor.
+ * - Kullanıcı sahnede herhangi bir yere dokunduğu an bir daha oynamıyor:
+ *   amaç öğretmek, öğrenene ısrar etmek değil.
+ * - Dokunulmazsa REPEAT_MS arayla en fazla MAX_RUNS kez tekrar.
+ *
+ * Animasyonun kendisi CSS'te (app.css → "Tıklanabilirlik ipucu").
+ * HINT_MS oradaki süreyi kapsamalı: halka 2 × 1.1sn + son öğenin gecikmesi.
+ */
+const HINT_MS = 3800
+const REPEAT_MS = 7000
+const MAX_RUNS = 3
+/* ipucunun gösterildiği öğeler: bir yere götüren ya da bir şey açan her şey */
+const HINTABLE = '.fprop--clickable, .fprop--mug'
+
+function useStageHint(ref) {
+  const { ready } = useApp()
+  const [visible, setVisible] = useState(false)
+  const [learned, setLearned] = useState(false)
+  const [hinting, setHinting] = useState(false)
+  const runs = useRef(0)
+
+  /* Dalga soldan sağa aksın: öğelere tuvaldeki yatay sıralarına göre numara */
+  useEffect(() => {
+    const items = [...ref.current.querySelectorAll(HINTABLE)]
+    items.sort((a, b) => a.offsetLeft - b.offsetLeft)
+    items.forEach((el, i) => el.style.setProperty('--hint-i', i))
+  }, [ref])
+
+  useEffect(() => {
+    const el = ref.current
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), {
+      threshold: 0.35,
+    })
+    io.observe(el)
+    /* sahneye dokunan, tıklanabildiğini öğrenmiştir */
+    const learn = () => setLearned(true)
+    el.addEventListener('pointerdown', learn)
+    return () => {
+      io.disconnect()
+      el.removeEventListener('pointerdown', learn)
+    }
+  }, [ref])
+
+  useEffect(() => {
+    if (!ready || !visible || learned) return
+    let timer = 0
+    const run = () => {
+      if (runs.current >= MAX_RUNS) return
+      runs.current += 1
+      setHinting(true)
+      timer = setTimeout(() => {
+        setHinting(false)
+        timer = setTimeout(run, REPEAT_MS)
+      }, HINT_MS)
+    }
+    /* ilk seferde perde kalkar kalkmaz değil, göz sahneye yerleşince */
+    timer = setTimeout(run, runs.current ? REPEAT_MS / 2 : 450)
+    return () => {
+      clearTimeout(timer)
+      setHinting(false)
+    }
+  }, [ready, visible, learned])
+
+  return hinting
+}
+
+/*
+ * Tuvalin kenarına yakın öğeleri işaretliyor (data-edge="left|right").
+ *
+ * Öğenin üstüne/altına çıkan etiketler (fiyat, telefon, "tekrar dokun")
+ * öğeye ortalanıyor. Telefonda sağ kenardaki kahve makinesinin etiketi
+ * bu yüzden ekrandan taşıp sayfayı yana kaydırıyordu. İşaretli öğelerde
+ * etiket ortalanmak yerine içe doğru hizalanıyor (app.css → [data-edge]).
+ */
+const EDGE = 0.2
+
+function useEdgeMarks(ref, sceneW) {
+  useEffect(() => {
+    ref.current.querySelectorAll('.iprop').forEach((el) => {
+      const center = (el.offsetLeft + el.offsetWidth / 2) / sceneW
+      if (center < EDGE) el.dataset.edge = 'left'
+      else if (center > 1 - EDGE) el.dataset.edge = 'right'
+    })
+  }, [ref, sceneW])
 }
 
 /*
@@ -98,15 +193,21 @@ export const Art = memo(function Art({ prop, replace }) {
   )
 })
 
-export default function Stage({ scene, defs, className = '', fit, header, children }) {
+
+export default function Stage({ scene, defs, className = '', fit, label, children }) {
   const fitHeight = fit === 'height'
-  const headerRef = useRef(null)
-  const [stageRef, scale] = useStageScale(scene, fitHeight, headerRef)
+  const [stageRef, scale] = useStageScale(scene, fitHeight)
+  const hinting = useStageHint(stageRef)
+  useEdgeMarks(stageRef, scene.w)
 
   return (
     <div
-      className={`stage ${fitHeight ? 'stage--fit' : ''} ${className}`}
+      className={['stage', fitHeight && 'stage--fit', hinting && 'is-hinting', className]
+        .filter(Boolean)
+        .join(' ')}
       ref={stageRef}
+      role="group"
+      aria-label={label}
       /*
        * Tuvalin o anki ölçeği CSS'e de veriliyor.
        *
@@ -114,7 +215,7 @@ export default function Stage({ scene, defs, className = '', fit, header, childr
        * şey 0.33 katına iniyor. Çizimin kendisi vektör, küçülmesi sorun
        * değil; ama fincanın fiyat etiketi gibi ÜSTÜNE BASTIĞIMIZ yazılar
        * da 12px'ten ~4px'e düşüp okunmaz oluyordu. app.css bu değeri
-       * kullanıp o etiketleri geri büyütüyor ("Dar ekran" bölümü).
+       * kullanıp o etiketleri (ve ipucu halkalarını) geri büyütüyor.
        *
        * Sadece DOM etiketleri için — çizimin İÇİNDEKİ balonlar (makine,
        * demlik, saat) küçülmeye devam ediyor, çünkü onlar çizimin parçası
@@ -129,20 +230,12 @@ export default function Stage({ scene, defs, className = '', fit, header, childr
         dangerouslySetInnerHTML={{ __html: defs }}
       />
 
-      {/*
-       * Başlık, çizimin sol kenarıyla hizalı olsun diye tuvalin ölçeklenmiş
-       * genişliğinde bir kutuya giriyor. Sayfanın soluna yaslarsan sahne
-       * scale'lendikçe hizadan kayıyor.
-       */}
-      {header && (
-        <div
-          className="stage__header"
-          ref={headerRef}
-          style={{ width: `${scene.w * scale}px` }}
-        >
-          {header}
-        </div>
-      )}
+      {/* tıklanabilirlik ipucunun rozeti; yazı aygıta göre CSS'te seçiliyor */}
+      <div className="stage__hint" aria-hidden="true">
+        <HandIcon />
+        <span className="stage__hint-touch">dokun, keşfet</span>
+        <span className="stage__hint-mouse">tıkla, keşfet</span>
+      </div>
 
       <div className="stage__box" style={{ height: `${scene.h * scale}px` }}>
         <div

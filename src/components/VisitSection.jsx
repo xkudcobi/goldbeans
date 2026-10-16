@@ -12,10 +12,7 @@ export default function VisitSection() {
   return (
     <section className="visit" id="ziyaret">
       <header className="section-head">
-        <p className="section-head__kicker">
-          <span className="pulser" aria-hidden="true" />
-          ZİYARET
-        </p>
+        <p className="section-head__kicker">ZİYARET</p>
         <h2 className="section-head__title">Uğra bir ara</h2>
       </header>
 

@@ -79,20 +79,27 @@ export default function useHover() {
    *
    * Fare (veya zaten açık olan öğe) hiç beklemiyor.
    */
-  const armed = useRef(false)
+  const armedRef = useRef(false)
+  /* ekranda "tekrar dokun" rozetini göstermek için durumun görünen hâli */
+  const [armed, setArmed] = useState(false)
+  const arm = useCallback((v) => {
+    armedRef.current = v
+    setArmed(v)
+  }, [])
+
   const guard = useCallback((e) => {
     if (!byTouch.current) return false
     /* aynı öğeye ikinci dokunuş → geç */
-    if (armed.current) { armed.current = false; return false }
-    armed.current = true
+    if (armedRef.current) { arm(false); return false }
+    arm(true)
     e.preventDefault()
     setHot(true)
     return true
-  }, [])
+  }, [arm])
 
   /* öğe kapandığında bekçi de sıfırlanmalı, yoksa bir sonraki dokunuş
      "ikinci dokunuş" sanılıp doğrudan gidiyor */
-  useEffect(() => { if (!hot) armed.current = false }, [hot])
+  useEffect(() => { if (!hot) arm(false) }, [hot, arm])
 
-  return [hot, bind, guard]
+  return [hot, bind, guard, armed]
 }

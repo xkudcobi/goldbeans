@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { AppState } from './state/AppState.jsx'
+import { AppState, useApp } from './state/AppState.jsx'
 import Preloader from './components/Preloader.jsx'
 import FixedUI from './components/FixedUI.jsx'
 import NowPlaying from './components/NowPlaying.jsx'
@@ -18,25 +17,17 @@ import './styles/app.css'
  * Kapı, altındaki şubeler bölümüne götürüyor; ikisi bu yüzden yan yana.
  *
  * Sahneler arası geçiş yatay carousel değil, aşağı scroll.
- *
- * ÇIKARILAN AMA SİLİNMEYEN İKİ PARÇA (geri istenirse hazır duruyor):
- *   - components/CloudIntro.jsx  → üstteki bulutlu boşluk. Buraya
- *     <CounterScene/>'den önce <CloudIntro/> koymak yeterli.
- *   - components/SceneCarousel.jsx + ControlBar.jsx → sağa/sola kaydırmalı
- *     sahne geçişi. Geri almak için CounterScene+RoomScene yerine
- *     <SceneCarousel/> koy.
- * İkisinin CSS'i de app.css içinde duruyor (.intro*, .carousel*).
  */
 
-export default function App() {
-  const [ready, setReady] = useState(false)
+function Page() {
+  const { ready, markReady } = useApp()
 
   /* sayfa içi '#' bağlantıları ışınlamak yerine kayarak gitsin */
   useSmoothAnchors()
 
   return (
-    <AppState>
-      <Preloader onDone={() => setReady(true)} />
+    <>
+      <Preloader onDone={markReady} />
       <FixedUI />
       <main className={`page${ready ? ' is-ready' : ''}`}>
         <CounterScene />
@@ -50,6 +41,14 @@ export default function App() {
       <NowPlaying />
       {/* tezgahtaki saate tıklayınca açılan saatler penceresi */}
       <HoursCard />
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <AppState>
+      <Page />
     </AppState>
   )
 }

@@ -51,16 +51,23 @@ export function branchPhone(branch) {
  */
 export const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
 
+/*
+ * Şube fotoğraflarının tam yolları. cafe.js'te 'subeler/x.jpg' diye
+ * yazılıyor, başına sitenin taban yolu ekleniyor — dev'de '/', GitHub
+ * Pages'te '/<repo>/'. Başında / ile yazılmışsa da çalışsın diye atılıyor.
+ */
+export function branchPhotos(branch) {
+  return (branch.photos ?? []).map(
+    (p) => encodeURI(import.meta.env.BASE_URL + p.replace(/^\//, '')),
+  )
+}
+
 export const cafe = {
   // --- Kimlik ---
   name: 'GoldBeans',
   tagline: 'more than coffee',
   // oda sahnesindeki posterin üstündeki yazı
   posterText: 'MORE THAN COFFEE',
-  intro: [
-    'Galeri değil, buluşma yeri',
-    'Bir yudum al, biraz kal',
-  ],
 
   /*
    * Açılış perdesinde harf harf yazılan satırlar.
@@ -73,9 +80,6 @@ export const cafe = {
     '(yükleniyor...)',
     '(hoş geldiniz)',
   ],
-
-  // --- Tezgah sahnesi başlığı ---
-  counterKicker: 'HER FİNCAN ELDE DEMLENİR. BUYUR, TAT.',
 
   /*
    * Öğelerin üstüne gelince çıkan konuşma balonlarının yazıları.
@@ -117,56 +121,123 @@ export const cafe = {
   },
 
   /*
-   * Raftaki fincanlar = imza içecekler.
-   * Sahnede 4 fincan var; sırayla bu listeden besleniyor.
+   * Raftaki fincanlar = öne çıkan içecekler.
+   * Sahnede 4 fincan var; sırayla bu listeden besleniyor. Fiyatlar
+   * aşağıdaki menüyle AYNI olmalı — menüde fiyat değişirse burayı da güncelle.
+   * `note` isteğe bağlı (boşsa etikette basılmıyor).
    * `shape` sadece çizim varyantı (0 veya 1).
    */
   signatures: [
-    { name: 'Flat White', note: 'çift shot, ipeksi süt', price: '₺95', shape: 0 },
-    { name: 'Filtre Kahve', note: 'günün çekirdeği, V60', price: '₺75', shape: 1 },
-    { name: 'Cortado', note: 'eşit ölçü, sert ve kısa', price: '₺85', shape: 1 },
-    { name: 'Sıcak Çikolata', note: '%70 bitter, ev yapımı', price: '₺90', shape: 0 },
+    { name: 'Flat White', note: 'sıcak kahve', price: '220 TL', shape: 0 },
+    { name: 'Filtre Kahve', note: 'sıcak kahve', price: '200 TL', shape: 1 },
+    { name: 'Cortado', note: 'sıcak kahve', price: '200 TL', shape: 1 },
+    { name: 'Sıcak Çikolata', note: 'sıcak favori', price: '180 TL', shape: 0 },
   ],
 
-  // --- Menü ---
+  /*
+   * --- Menü ---
+   * Kaynak: "MENÜ son.pdf". Gruplar ve sıra PDF'teki gibi.
+   * `note` isteğe bağlı: ürünün altında küçük yazıyla çıkıyor.
+   */
   menu: [
     {
-      group: 'Espresso Bar',
+      group: 'Sıcak Kahveler',
       items: [
-        { name: 'Espresso', note: 'tek / çift', price: '₺55 / ₺70' },
-        { name: 'Americano', note: '', price: '₺75' },
-        { name: 'Flat White', note: 'çift shot', price: '₺95' },
-        { name: 'Cappuccino', note: '', price: '₺90' },
-        { name: 'Latte', note: 'sade / aromalı', price: '₺90 / ₺100' },
-        { name: 'Cortado', note: '', price: '₺85' },
+        { name: 'Espresso', price: '130 TL' },
+        { name: 'Filtre Kahve', price: '200 TL' },
+        { name: 'Americano', price: '200 TL' },
+        { name: 'Latte', price: '220 TL' },
+        { name: 'Mocha', price: '230 TL' },
+        { name: 'White Mocha', price: '230 TL' },
+        { name: 'İtalyan Karamel', price: '240 TL' },
+        { name: 'Karamel Latte', price: '230 TL' },
+        { name: 'Cortado', price: '200 TL' },
+        { name: 'Cappuccino', price: '220 TL' },
+        { name: 'Flat White', price: '220 TL' },
+        { name: 'Caramel Macchiato', price: '240 TL' },
+        { name: 'Toffee Nut Latte', price: '230 TL' },
+        { name: 'Vanilya Latte', price: '230 TL' },
+        { name: 'Ube Latte', price: '240 TL' },
+        { name: 'Cookie Latte', price: '230 TL' },
+        { name: 'Cremee Brule Latte', price: '230 TL' },
+        { name: 'Pumpkin Spice Latte', price: '230 TL' },
+        { name: 'Lotus Latte', price: '230 TL' },
+        { name: 'Marshmallow Latte', price: '230 TL' },
+        { name: 'Pistachio Latte', price: '240 TL' },
+        { name: 'Türk Kahvesi', price: '130 TL' },
       ],
     },
     {
-      group: 'Demleme',
+      group: 'Soğuk Kahveler',
       items: [
-        { name: 'V60', note: 'tek origin, günlük değişir', price: '₺85' },
-        { name: 'Chemex', note: 'iki kişilik', price: '₺140' },
-        { name: 'Cold Brew', note: '16 saat demleme', price: '₺90' },
-        { name: 'Türk Kahvesi', note: 'sade / orta / şekerli', price: '₺60' },
+        { name: 'Ice Americano', price: '200 TL' },
+        { name: 'Ice Latte', price: '220 TL' },
+        { name: 'Ice Mocha', price: '230 TL' },
+        { name: 'Ice White Mocha', price: '230 TL' },
+        { name: 'Ice Vanilya Latte', price: '230 TL' },
+        { name: 'Ice Karamel Latte', price: '230 TL' },
+        { name: 'Ice Toffee Nut Latte', price: '230 TL' },
+        { name: 'Ice Karamel Macchiato', price: '240 TL' },
+        { name: 'Ice İtalyan Karamel Latte', price: '240 TL' },
+        { name: 'Ice Cremee Brule Latte', price: '230 TL' },
+        { name: 'Ice Pumpkin Spice Latte', price: '230 TL' },
+        { name: 'Ice Lotus Latte', price: '230 TL' },
+        { name: 'Ice Marshmallow Latte', price: '230 TL' },
+        { name: 'Ice Pistachio Latte', price: '240 TL' },
+        { name: 'Cold Brew', price: '250 TL' },
       ],
     },
     {
-      group: 'Kahve Dışı',
+      group: 'Sıcak Favoriler',
       items: [
-        { name: 'Sıcak Çikolata', note: '%70 bitter', price: '₺90' },
-        { name: 'Matcha Latte', note: 'tören sınıfı matcha', price: '₺110' },
-        { name: 'Demleme Çay', note: 'siyah / yeşil / bitki', price: '₺50' },
-        { name: 'Taze Limonata', note: 'nane ile', price: '₺70' },
+        { name: 'Siyah Çay', price: '50 TL' },
+        { name: 'Fincan Çay', price: '80 TL' },
+        { name: 'Ihlamur', price: '180 TL' },
+        { name: 'Kış Çayı', price: '180 TL' },
+        { name: 'Sıcak Çikolata', price: '180 TL' },
+        { name: 'Beyaz Sıcak Çikolata', price: '180 TL' },
+        { name: 'Ruby Sıcak Çikolata', price: '180 TL' },
+        { name: 'Sahlep', price: '180 TL' },
+        { name: 'Chai Tea', price: '180 TL' },
       ],
     },
     {
-      group: 'Fırın',
+      group: 'Soğuk Favoriler',
       items: [
-        { name: 'Tereyağlı Kruvasan', note: 'sabah tazesi', price: '₺75' },
-        { name: 'Badem Kurabiyesi', note: '', price: '₺60' },
-        { name: 'Günün Keki', note: 'tezgaha sor', price: '₺80' },
-        { name: 'Avokadolu Ekmek', note: 'ekşi maya, susam', price: '₺135' },
-        { name: 'Peynirli Poğaça', note: '', price: '₺65' },
+        { name: 'Churchill', price: '130 TL' },
+        { name: 'Limonata', price: '180 TL' },
+        { name: 'Çilekli Limonata', price: '200 TL' },
+        { name: 'Cool Lime', price: '220 TL' },
+        { name: 'RedBull', price: '200 TL' },
+        {
+          name: 'Frozen',
+          note: 'çilek, yeşil elma, yaban mersini, mango, orman meyveleri',
+          price: '220 TL',
+        },
+        { name: 'Milkshake', note: 'çikolata, çilek, vanilya, karamel', price: '220 TL' },
+        { name: 'Berry Hibiscus', price: '220 TL' },
+        { name: 'Burn', price: '200 TL' },
+        { name: 'Soda Limon', price: '130 TL' },
+        { name: 'Su', price: '40 TL' },
+        { name: 'Soda', price: '80 TL' },
+      ],
+    },
+    {
+      group: 'Tatlılar',
+      items: [
+        { name: 'Tiramisu', price: '250 TL' },
+        { name: 'Spoonful', price: '250 TL' },
+        { name: 'Magnolia', price: '250 TL' },
+        { name: 'Lotus Cup', price: '250 TL' },
+        { name: 'Strawberry Cup', price: '250 TL' },
+      ],
+    },
+    {
+      group: 'Ekstra',
+      items: [
+        { name: 'Shot', price: '50 TL' },
+        { name: 'Badem Sütü', price: '50 TL' },
+        { name: 'Yulaf Sütü', price: '50 TL' },
       ],
     },
   ],
@@ -217,11 +288,27 @@ export const cafe = {
    * `lines` : ekranda okunan adres.
    * `mapUrl`: tıklanınca açılan Maps kaydı. Bkz. branchMapUrl().
    * `soon`  : true ise henüz açılmadı.
+   * `soonNote`: açılmamış şubenin fotoğrafı yoksa kapakta kum saatinin
+   *           altında yazan not (yoksa 'çok yakında').
+   * `photos`: şube kartına dokununca açılan galerinin fotoğrafları.
+   *           Dosyaları public/subeler/ içine at, buraya adlarını yaz:
+   *             photos: ['subeler/cadde-1.jpg', 'subeler/cadde-2.jpg'],
+   *           Baştaki / OLMADAN yaz — site alt yolda yayınlanınca da
+   *           çalışsın diye taban yolu otomatik ekleniyor. İlk fotoğraf
+   *           kartın kapağı oluyor. Liste boşsa kartta "fotoğraflar
+   *           yakında" yazıyor; pencere yine açılıyor (adres, telefon, harita).
+   *           Önerilen: ~1000px genişlik, JPG, tanesi < 300 KB. Dikey de olur.
    */
   locations: [
     {
       name: 'Goldbeans Cadde',
       lines: ['Kırtepe, Hükümet Cd. No:12/G', '74100 Merkez / Bartın'],
+      photos: [
+        'subeler/cadde-1.jpg',
+        'subeler/cadde-2.jpg',
+        'subeler/cadde-3.jpg',
+        'subeler/cadde-4.jpg',
+      ],
       /* numara girilmedi → merkez numaraya düşüyor, bkz. branchPhone */
       /* Maps'te kayıt adı sadece "Goldbeans" */
       mapUrl:
@@ -230,6 +317,13 @@ export const cafe = {
     {
       name: 'Goldbeans Garden',
       lines: ['Demirciler, Rıfat Ilgaz Sk. No:49', '74100 Merkez / Bartın'],
+      photos: [
+        'subeler/garden-1.jpg',
+        'subeler/garden-2.jpg',
+        'subeler/garden-3.jpg',
+        'subeler/garden-4.jpg',
+        'subeler/garden-5.jpg',
+      ],
       /* Maps'te "Goldbeans Garden Coffee" */
       mapUrl:
         'https://www.google.com/maps/place/Goldbeans+Garden+Coffee/@41.63057,32.33922,19z/data=!4m6!3m5!1s0x409b7300621d0249:0x7691b6a712961342!8m2!3d41.63057!4d32.33922!16s%2Fg%2F11nr23tcgp',
@@ -237,6 +331,11 @@ export const cafe = {
     {
       name: 'Goldbeans İnkum',
       lines: ['İskele Cad. 15 Nolu Sk. No:44/A', '74110 Merkez / Bartın'],
+      photos: [
+        'subeler/inkum-1.jpg',
+        'subeler/inkum-2.jpg',
+        'subeler/inkum-3.jpg',
+      ],
       /* Maps'te "Goldbeans İnkumu" */
       mapUrl:
         'https://www.google.com/maps/place/Goldbeans+%C4%B0nkumu/@41.669224,32.2273824,18z/data=!4m6!3m5!1s0x409b75002c064747:0xc24e3d42a6d523f1!8m2!3d41.669224!4d32.2273824!16s%2Fg%2F11zgs01cw1',
@@ -244,6 +343,7 @@ export const cafe = {
     {
       name: 'Goldbeans Zonguldak',
       lines: ['Meşrutiyet, Gazi Paşa Cd.', '67000 Merkez / Zonguldak'],
+      photos: ['subeler/zonguldak-1.jpg', 'subeler/zonguldak-2.jpg'],
       /* kendi hattı kalmadı → merkez numaraya düşüyor, bkz. branchPhone */
       /* Maps'te "Goldbeans Coffee Zonguldak" */
       mapUrl:
@@ -252,15 +352,32 @@ export const cafe = {
     {
       name: 'GoldChef Yalı',
       lines: ['Orduyeri, Tersane Cd. 7', '74100 Merkez / Bartın'],
-      soon: true,
+      photos: ['subeler/chef-1.jpg'],
       /* Maps'te bu kayıt "Goldbeans" adıyla duruyor */
       mapUrl:
         'https://www.google.com/maps/place/Goldbeans/@41.6385895,32.3368646,19z/data=!4m6!3m5!1s0x409b730078c2bfb1:0x9cce383319e55f4!8m2!3d41.6385895!4d32.3368646!16s%2Fg%2F11x88n23t6',
     },
     {
+      /* GoldChef Yalı ile aynı adres ve Maps kaydı */
       name: 'Goldbeans Yalı',
+      lines: ['Orduyeri, Tersane Cd. 7', '74100 Merkez / Bartın'],
+      photos: [
+        'subeler/yali-1.jpg',
+        'subeler/yali-2.jpg',
+        'subeler/yali-3.jpg',
+        'subeler/yali-4.jpg',
+        'subeler/yali-5.jpg',
+        'subeler/yali-6.jpg',
+        'subeler/yali-7.jpg',
+        'subeler/yali-8.jpg',
+      ],
+      mapUrl:
+        'https://www.google.com/maps/place/Goldbeans/@41.6385895,32.3368646,19z/data=!4m6!3m5!1s0x409b730078c2bfb1:0x9cce383319e55f4!8m2!3d41.6385895!4d32.3368646!16s%2Fg%2F11x88n23t6',
+    },
+    {
+      name: 'Goldbeans Meydan',
       lines: ['Kırtepe, Gümrük Sk.', 'Güney Akrabaoğlu Sitesi', '74100 Merkez / Bartın'],
-      soon: true,
+      photos: ['subeler/meydan-1.jpg'],
       /* Maps'te kayıt hâlâ "Colombia Coffee Bartın" adında */
       mapUrl:
         'https://www.google.com/maps/place/Colombia+Coffee+Bart%C4%B1n/@41.636995,32.3336801,20z/data=!4m6!3m5!1s0x409b73a9de921b5b:0xc887fbf3a1727987!8m2!3d41.636995!4d32.3336801!16s%2Fg%2F11vdn_wtmr',
@@ -268,14 +385,16 @@ export const cafe = {
     {
       name: 'Goldbeans İstanbul',
       lines: ['Çok yakında...'],
+      photos: [],
       // Maps kaydı yok → harita linki de basılmıyor
       phone: null, // henüz hattı yok, merkez numaraya da düşmesin
       soon: true,
+      soonNote: 'İstanbul demleniyor…',
     },
   ],
 
   // --- Alt bilgi ---
-  footerNote: 'Çekirdekler haftalık kavruluyor. Sütsüz alternatifler ek ücretsiz.',
+  footerNote: '*Ürünlerimiz süt, yumurta, gluten, kuruyemiş gibi alerjenler içerebilir.',
 }
 
 export default cafe

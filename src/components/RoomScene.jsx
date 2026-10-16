@@ -57,12 +57,7 @@ export default function RoomScene() {
         scene={SCENE}
         defs={DEFS}
         className="room-stage"
-        header={
-          <p className="scene__kicker">
-            <span className="pulser" aria-hidden="true" />
-            KAPIDAN GİR — ŞUBELERİMİZ İÇERİDE
-          </p>
-        }
+        label="Oda"
       >
         {PROPS.map((p) => {
           if (p.id === 'door-2') {

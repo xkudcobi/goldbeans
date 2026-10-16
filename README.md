@@ -103,18 +103,36 @@ export const cafe = {
    (`Stage.jsx`, `fit="height"`); genişlik üst sınır.
 3. **Menü** — gruplu fiyat listesi
 4. **Kapı odası** — kapı şubelere götürüyor
-5. **Şubeler** — kapının çıktığı ekran (tasarımı henüz konuşulmadı)
+5. **Şubeler** — kapının çıktığı ekran. Her şube bir kart; karta dokununca
+   fotoğraf galerisi + adres/telefon/harita penceresi açılıyor
+   (`BranchDialog.jsx`).
 6. **Ziyaret** — saatler, adres, iletişim
 7. **Alt bilgi**
 
-### Çıkarılan ama silinmeyen iki parça
+### Şube fotoğrafları
 
-Geri istenirse hazır duruyorlar — bileşen de CSS de yerinde:
+Fotoğrafları `public/subeler/` klasörüne at, `cafe.js`'te ilgili şubenin
+`photos` listesine adlarını yaz (baştaki `/` olmadan):
 
-| Parça | Neydi | Geri almak için |
-|---|---|---|
-| `components/CloudIntro.jsx` | Üstteki bulutlu boşluk, scroll'la beliren satırlar | `App.jsx`'te `<CounterScene/>`'den önce `<CloudIntro/>` |
-| `components/SceneCarousel.jsx` + `ControlBar.jsx` | Sağa/sola sahne geçişi | `<CounterScene/><RoomScene/>` yerine `<SceneCarousel/>` |
+```js
+photos: ['subeler/cadde-1.jpg', 'subeler/cadde-2.jpg'],
+```
+
+İlk fotoğraf kartın kapağı olur. Liste boşsa kartta "fotoğraflar yakında"
+yazar. ~1000px genişlik, tanesi 300 KB altı JPG önerilir; dikey de olur.
+
+### Tıklanabilirlik ipucu
+
+Sahne ekrana girince tıklanabilir her öğenin üstünde sırayla bir halka
+yayılıyor ve "dokun, keşfet" rozeti çıkıyor. Kullanıcı sahneye dokunana kadar
+en fazla 3 kez tekrarlıyor. Mantık `Stage.jsx → useStageHint`, animasyon
+`app.css → "Tıklanabilirlik ipucu"`.
+
+Telefonda linkli öğelerde ilk dokunuş balonu/etiketi açar, ikincisi gider;
+arada "gitmek için tekrar dokun" rozeti çıkıyor (`hooks/useHover.js`).
+
+Eski bulutlu giriş (`CloudIntro`) ve yatay carousel (`SceneCarousel`,
+`ControlBar`) silindi; geri istenirse git geçmişinde duruyorlar.
 
 ## Etkileşimler
 
